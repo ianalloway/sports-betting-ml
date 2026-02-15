@@ -1,3 +1,15 @@
+---
+title: Sports Betting ML
+emoji: 🏀
+colorFrom: orange
+colorTo: red
+sdk: streamlit
+sdk_version: 1.28.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # Sports Betting ML
 
 A machine learning model for predicting NBA game outcomes and identifying value bets by comparing model predictions to betting market odds.
