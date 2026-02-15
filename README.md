@@ -12,6 +12,13 @@ license: mit
 
 # Sports Betting ML
 
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-017CEE?style=flat&logo=xgboost&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+
+[![Live Demo](https://img.shields.io/badge/🤗_Hugging_Face-Live_Demo-yellow)](https://huggingface.co/spaces/ianalloway/sports-betting-ml)
+
 A machine learning model for predicting NBA game outcomes and identifying value bets by comparing model predictions to betting market odds.
 
 ## Features
