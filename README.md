@@ -21,7 +21,7 @@ license: mit
 
 ![Demo](demo.gif)
 
-A machine learning model for predicting NBA game outcomesand identifying value bets by comparing model predictions to betting market odds.
+A machine learning model for predicting NBA game outcomes and identifying value bets by comparing model predictions to betting market odds.
 
 ## Features
 
