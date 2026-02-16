@@ -19,6 +19,10 @@ license: mit
 
 [![Live Demo](https://img.shields.io/badge/🤗_Hugging_Face-Live_Demo-yellow)](https://huggingface.co/spaces/ianalloway/sports-betting-ml)
 
+<p align="center">
+  <img src="docs/architecture.svg" alt="Sports Betting ML Architecture" width="800"/>
+</p>
+
 ![Demo](demo.gif)
 
 A machine learning model for predicting NBA game outcomes and identifying value bets by comparing model predictions to betting market odds.

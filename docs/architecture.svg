@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f23;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a3e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b8860b;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="480" fill="url(#bgGrad)"/>
+  
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" fill="#ffd700" font-family="Arial, sans-serif" font-size="22" font-weight="bold">Sports Betting ML - XGBoost Prediction Engine</text>
+  
+  <!-- Data Sources -->
+  <rect x="30" y="70" width="160" height="130" rx="10" fill="#1e1e3f" stroke="#4a9eff" stroke-width="2"/>
+  <text x="110" y="95" text-anchor="middle" fill="#4a9eff" font-family="Arial, sans-serif" font-size="13" font-weight="bold">DATA SOURCES</text>
+  <text x="110" y="120" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Historical Games</text>
+  <text x="110" y="138" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Team Statistics</text>
+  <text x="110" y="156" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Player Metrics</text>
+  <text x="110" y="174" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Live Odds API</text>
+  <circle cx="50" cy="85" r="4" fill="#4a9eff">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Feature Engineering -->
+  <rect x="220" y="70" width="160" height="130" rx="10" fill="#1e1e3f" stroke="#00d4aa" stroke-width="2"/>
+  <text x="300" y="95" text-anchor="middle" fill="#00d4aa" font-family="Arial, sans-serif" font-size="13" font-weight="bold">FEATURES</text>
+  <text x="300" y="120" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Win/Loss Streaks</text>
+  <text x="300" y="138" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Home/Away Splits</text>
+  <text x="300" y="156" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Rest Days</text>
+  <text x="300" y="174" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Head-to-Head</text>
+  <circle cx="240" cy="85" r="4" fill="#00d4aa">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" begin="0.4s"/>
+  </circle>
+  
+  <!-- XGBoost Model -->
+  <rect x="410" y="70" width="160" height="130" rx="10" fill="#1e1e3f" stroke="#ff6b6b" stroke-width="2"/>
+  <text x="490" y="95" text-anchor="middle" fill="#ff6b6b" font-family="Arial, sans-serif" font-size="13" font-weight="bold">XGBOOST MODEL</text>
+  <text x="490" y="120" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Gradient Boosting</text>
+  <text x="490" y="138" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Cross-Validation</text>
+  <text x="490" y="156" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Hyperparameter Tuning</text>
+  <text x="490" y="174" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Feature Importance</text>
+  <circle cx="430" cy="85" r="4" fill="#ff6b6b">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" begin="0.8s"/>
+  </circle>
+  
+  <!-- Kelly Criterion -->
+  <rect x="600" y="70" width="170" height="130" rx="10" fill="#1e1e3f" stroke="#ffd700" stroke-width="2"/>
+  <text x="685" y="95" text-anchor="middle" fill="#ffd700" font-family="Arial, sans-serif" font-size="13" font-weight="bold">KELLY CRITERION</text>
+  <text x="685" y="120" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Optimal Bet Sizing</text>
+  <text x="685" y="138" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Bankroll Management</text>
+  <text x="685" y="156" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Risk Adjustment</text>
+  <text x="685" y="174" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="10">Expected Value</text>
+  <circle cx="620" cy="85" r="4" fill="#ffd700">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" begin="1.2s"/>
+  </circle>
+  
+  <!-- Connection Lines -->
+  <line x1="190" y1="135" x2="220" y2="135" stroke="#4a9eff" stroke-width="2" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" from="8" to="0" dur="0.8s" repeatCount="indefinite"/>
+  </line>
+  <line x1="380" y1="135" x2="410" y2="135" stroke="#00d4aa" stroke-width="2" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" from="8" to="0" dur="0.8s" repeatCount="indefinite" begin="0.3s"/>
+  </line>
+  <line x1="570" y1="135" x2="600" y2="135" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" from="8" to="0" dur="0.8s" repeatCount="indefinite" begin="0.6s"/>
+  </line>
+  
+  <!-- Output Dashboard -->
+  <rect x="200" y="240" width="400" height="120" rx="12" fill="#1e1e3f" stroke="#ffd700" stroke-width="2"/>
+  <text x="400" y="270" text-anchor="middle" fill="#ffd700" font-family="Arial, sans-serif" font-size="15" font-weight="bold">PREDICTION DASHBOARD</text>
+  <text x="400" y="295" text-anchor="middle" fill="#8b949e" font-family="Arial, sans-serif" font-size="11">Win Probability | Confidence Score | Recommended Bet Size</text>
+  
+  <!-- Sample prediction boxes -->
+  <rect x="220" y="310" width="110" height="40" rx="5" fill="#2d2d5a" stroke="#4a9eff" stroke-width="1"/>
+  <text x="275" y="328" text-anchor="middle" fill="#4a9eff" font-family="Arial, sans-serif" font-size="9">Lakers vs Celtics</text>
+  <text x="275" y="342" text-anchor="middle" fill="#00d4aa" font-family="Arial, sans-serif" font-size="10" font-weight="bold">68% WIN</text>
+  
+  <rect x="345" y="310" width="110" height="40" rx="5" fill="#2d2d5a" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="400" y="328" text-anchor="middle" fill="#ff6b6b" font-family="Arial, sans-serif" font-size="9">Chiefs vs Bills</text>
+  <text x="400" y="342" text-anchor="middle" fill="#00d4aa" font-family="Arial, sans-serif" font-size="10" font-weight="bold">54% WIN</text>
+  
+  <rect x="470" y="310" width="110" height="40" rx="5" fill="#2d2d5a" stroke="#ffd700" stroke-width="1"/>
+  <text x="525" y="328" text-anchor="middle" fill="#ffd700" font-family="Arial, sans-serif" font-size="9">Yankees vs Dodgers</text>
+  <text x="525" y="342" text-anchor="middle" fill="#00d4aa" font-family="Arial, sans-serif" font-size="10" font-weight="bold">61% WIN</text>
+  
+  <!-- Vertical connection -->
+  <line x1="400" y1="200" x2="400" y2="240" stroke="#ffd700" stroke-width="2">
+    <animate attributeName="stroke-opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  
+  <!-- Sports icons row -->
+  <text x="280" y="400" text-anchor="middle" fill="#4a9eff" font-family="Arial, sans-serif" font-size="20">NBA</text>
+  <text x="400" y="400" text-anchor="middle" fill="#ff6b6b" font-family="Arial, sans-serif" font-size="20">NFL</text>
+  <text x="520" y="400" text-anchor="middle" fill="#ffd700" font-family="Arial, sans-serif" font-size="20">MLB</text>
+  
+  <!-- Performance stats -->
+  <text x="400" y="440" text-anchor="middle" fill="#00d4aa" font-family="Arial, sans-serif" font-size="12">Historical Accuracy: 58.3% | ROI: +12.4% | 2,500+ Games Analyzed</text>
+  
+  <!-- Tech stack -->
+  <text x="400" y="468" text-anchor="middle" fill="#484f58" font-family="Arial, sans-serif" font-size="9">Python | XGBoost | Pandas | Scikit-learn | Streamlit | The Odds API</text>
+</svg>
