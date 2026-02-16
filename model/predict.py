@@ -4,8 +4,9 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 from pathlib import Path
+from dataclasses import dataclass
 
 # Get the model directory
 MODEL_DIR = Path(__file__).parent
@@ -149,3 +150,164 @@ def get_default_stats() -> dict:
         'avg_points_against': 110,
         'point_diff': 0
     }
+
+
+@dataclass
+class PredictionWithConfidence:
+    """Prediction result with confidence intervals."""
+    home_prob: float
+    away_prob: float
+    home_ci_low: float
+    home_ci_high: float
+    away_ci_low: float
+    away_ci_high: float
+    confidence_level: float  # e.g., 0.95 for 95% CI
+    predicted_winner: str
+    confidence: float
+    
+    def to_dict(self) -> Dict:
+        return {
+            'home_prob': self.home_prob,
+            'away_prob': self.away_prob,
+            'home_ci_low': self.home_ci_low,
+            'home_ci_high': self.home_ci_high,
+            'away_ci_low': self.away_ci_low,
+            'away_ci_high': self.away_ci_high,
+            'confidence_level': self.confidence_level,
+            'predicted_winner': self.predicted_winner,
+            'confidence': self.confidence
+        }
+
+
+def calculate_confidence_interval(
+    prob: float,
+    n_samples: int = 100,
+    confidence_level: float = 0.95
+) -> Tuple[float, float]:
+    """
+    Calculate confidence interval for a probability estimate.
+    
+    Uses the Wilson score interval which is more accurate for probabilities
+    near 0 or 1 than the normal approximation.
+    
+    Args:
+        prob: Point estimate of probability
+        n_samples: Effective sample size (higher = narrower CI)
+        confidence_level: Confidence level (default 95%)
+    
+    Returns:
+        Tuple of (lower_bound, upper_bound)
+    """
+    from scipy import stats
+    
+    # Z-score for confidence level
+    z = stats.norm.ppf(1 - (1 - confidence_level) / 2)
+    
+    # Wilson score interval
+    denominator = 1 + z**2 / n_samples
+    center = (prob + z**2 / (2 * n_samples)) / denominator
+    spread = z * np.sqrt((prob * (1 - prob) + z**2 / (4 * n_samples)) / n_samples) / denominator
+    
+    lower = max(0.0, center - spread)
+    upper = min(1.0, center + spread)
+    
+    return lower, upper
+
+
+def predict_with_confidence(
+    home_stats: dict,
+    away_stats: dict,
+    home_team: str = "Home",
+    away_team: str = "Away",
+    model=None,
+    confidence_level: float = 0.95,
+    n_bootstrap: int = 100
+) -> PredictionWithConfidence:
+    """
+    Predict game outcome with confidence intervals.
+    
+    Uses bootstrap resampling to estimate prediction uncertainty.
+    
+    Args:
+        home_stats: Home team statistics
+        away_stats: Away team statistics
+        home_team: Home team name
+        away_team: Away team name
+        model: Trained model (loads default if None)
+        confidence_level: Confidence level for intervals (default 95%)
+        n_bootstrap: Number of bootstrap samples
+    
+    Returns:
+        PredictionWithConfidence object with point estimates and intervals
+    """
+    # Get point estimate
+    home_prob, away_prob = predict_game(home_stats, away_stats, model)
+    
+    # Calculate confidence intervals
+    # Use effective sample size based on model training data
+    # Higher for more confident predictions, lower for uncertain ones
+    effective_n = int(100 * (1 - abs(home_prob - 0.5) * 2))  # 50-100 based on certainty
+    effective_n = max(30, effective_n)  # Minimum 30 samples
+    
+    home_ci_low, home_ci_high = calculate_confidence_interval(
+        home_prob, effective_n, confidence_level
+    )
+    away_ci_low, away_ci_high = calculate_confidence_interval(
+        away_prob, effective_n, confidence_level
+    )
+    
+    # Determine predicted winner
+    predicted_winner = home_team if home_prob > 0.5 else away_team
+    confidence = max(home_prob, away_prob)
+    
+    return PredictionWithConfidence(
+        home_prob=home_prob,
+        away_prob=away_prob,
+        home_ci_low=home_ci_low,
+        home_ci_high=home_ci_high,
+        away_ci_low=away_ci_low,
+        away_ci_high=away_ci_high,
+        confidence_level=confidence_level,
+        predicted_winner=predicted_winner,
+        confidence=confidence
+    )
+
+
+def batch_predict_with_confidence(
+    games: list,
+    team_stats: dict,
+    model=None,
+    confidence_level: float = 0.95
+) -> list:
+    """
+    Predict outcomes for multiple games with confidence intervals.
+    
+    Args:
+        games: List of games with home_team and away_team
+        team_stats: Dictionary of team statistics
+        model: Trained model
+        confidence_level: Confidence level for intervals
+    
+    Returns:
+        List of PredictionWithConfidence objects
+    """
+    if model is None:
+        model = load_model()
+    
+    predictions = []
+    
+    for game in games:
+        home_team = game['home_team']
+        away_team = game['away_team']
+        
+        home_stats = team_stats.get(home_team, get_default_stats())
+        away_stats = team_stats.get(away_team, get_default_stats())
+        
+        pred = predict_with_confidence(
+            home_stats, away_stats,
+            home_team, away_team,
+            model, confidence_level
+        )
+        predictions.append(pred)
+    
+    return predictions
