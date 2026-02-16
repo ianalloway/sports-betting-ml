@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    restart: unless-stopped
+    environment:
+      - STREAMLIT_SERVER_PORT=7860
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    volumes:
+      - model_data:/app/model
+
+  # Development service with hot reload
+  dev:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+      - pip_cache:/root/.cache/pip
+    ports:
+      - "7860:7860"
+    command: >
+      sh -c "pip install -r requirements.txt &&
+             streamlit run app.py --server.port=7860 --server.address=0.0.0.0 --server.runOnSave=true"
+    profiles:
+      - dev
+
+volumes:
+  model_data:
+  pip_cache:
