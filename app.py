@@ -17,7 +17,7 @@ from utils.kelly import (
     calculate_edge
 )
 from utils.odds import get_nba_odds, parse_odds, get_best_odds
-from model.predict import predict_game, get_default_stats
+from model.predict import predict_game, get_default_stats, predict_with_confidence
 
 # Page config
 st.set_page_config(
@@ -147,9 +147,13 @@ with tab1:
         with st.container():
             col1, col2, col3 = st.columns([2, 1, 2])
             
+            # Get prediction with confidence intervals
+            pred_ci = predict_with_confidence(home_stats, away_stats, home_team, away_team)
+            
             with col1:
                 st.subheader(f"🏠 {home_team}")
                 st.metric("Model Probability", f"{home_prob:.1%}")
+                st.caption(f"95% CI: [{pred_ci.home_ci_low:.1%} - {pred_ci.home_ci_high:.1%}]")
                 st.metric("Best Odds", f"{best_home_odds:+d}")
                 st.metric("Implied Probability", f"{home_implied:.1%}")
                 if home_edge > 0:
@@ -167,6 +171,7 @@ with tab1:
             with col3:
                 st.subheader(f"✈️ {away_team}")
                 st.metric("Model Probability", f"{away_prob:.1%}")
+                st.caption(f"95% CI: [{pred_ci.away_ci_low:.1%} - {pred_ci.away_ci_high:.1%}]")
                 st.metric("Best Odds", f"{best_away_odds:+d}")
                 st.metric("Implied Probability", f"{away_implied:.1%}")
                 if away_edge > 0:
