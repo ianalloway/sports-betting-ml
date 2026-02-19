@@ -24,42 +24,38 @@ wheels/
 venv/
 ENV/
 env/
-.venv/
+.venv
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
 
-# Environment variables
-.env
-.env.local
-
-# Model files (large)
-*.pkl
-*.joblib
-*.h5
-*.pt
-*.pth
-
-# Data files
-*.csv
-*.xlsx
-*.json
-!package.json
-
 # Jupyter
 .ipynb_checkpoints/
+*.ipynb
+
+# Model files
+model/*.pkl
+model/*.joblib
+*.h5
+*.pb
+
+# Data
+data/raw/
+data/processed/
+*.csv
+
+# Streamlit
+.streamlit/
+ STREAMLIT.gitignore
+
+# Environment
+.env
+.env.local
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Streamlit
-.streamlit/secrets.toml
