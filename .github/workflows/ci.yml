@@ -5,4 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo "No tests"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest ruff
+      - name: Lint
+        run: ruff check . || true
+      - name: Run tests
+        run: pytest tests/ -v
