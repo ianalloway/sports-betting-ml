@@ -225,9 +225,9 @@ def predict_with_confidence(
 ) -> PredictionWithConfidence:
     """
     Predict game outcome with confidence intervals.
-    
-    Uses bootstrap resampling to estimate prediction uncertainty.
-    
+
+    Uses the Wilson score interval to estimate prediction uncertainty.
+
     Args:
         home_stats: Home team statistics
         away_stats: Away team statistics
@@ -235,8 +235,8 @@ def predict_with_confidence(
         away_team: Away team name
         model: Trained model (loads default if None)
         confidence_level: Confidence level for intervals (default 95%)
-        n_bootstrap: Number of bootstrap samples
-    
+        n_bootstrap: Number of bootstrap samples (unused; kept for API compatibility)
+
     Returns:
         PredictionWithConfidence object with point estimates and intervals
     """
