@@ -72,8 +72,9 @@ predictions to betting odds to find value bets.
 4. Uses Kelly Criterion for bet sizing
 """)
 
-# Sample team stats (in production, fetch from NBA API)
-TEAM_STATS = {
+# Demo team stats (fallback when no real data available)
+# In production, fetch from NBA API or stats database
+DEMO_TEAM_STATS = {
     'Boston Celtics': {'win_pct': 0.72, 'avg_points_for': 118.5, 'avg_points_against': 109.2, 'point_diff': 9.3},
     'Cleveland Cavaliers': {'win_pct': 0.70, 'avg_points_for': 116.8, 'avg_points_against': 108.5, 'point_diff': 8.3},
     'Oklahoma City Thunder': {'win_pct': 0.68, 'avg_points_for': 117.2, 'avg_points_against': 106.8, 'point_diff': 10.4},
@@ -101,26 +102,37 @@ tab1, tab2, tab3 = st.tabs(["📊 Today's Games", "🎯 Value Bets", "📈 Model
 
 with tab1:
     st.header("Today's NBA Games")
-    
-    # Fetch odds
-    with st.spinner("Fetching odds..."):
-        raw_odds = get_nba_odds()
-        games = parse_odds(raw_odds)
-    
-    if not games:
-        st.warning("No games available. Showing demo data.")
+
+    # Fetch odds with error handling
+    try:
+        with st.spinner("Fetching odds..."):
+            raw_odds = get_nba_odds()
+            games = parse_odds(raw_odds) if raw_odds else []
+
+        if not games:
+            st.warning("No games available. Showing demo data.")
+            is_demo = True
+        else:
+            is_demo = False
+    except Exception as e:
+        st.error(f"Failed to fetch odds: {str(e)}")
+        st.info("Using demo data for display purposes.")
+        raw_odds = get_nba_odds()  # This will return demo data on error
+        games = parse_odds(raw_odds) if raw_odds else []
+        is_demo = True
     
     # Display games
     for game in games:
-        home_team = game['home_team']
-        away_team = game['away_team']
-        
-        # Get team stats
-        home_stats = TEAM_STATS.get(home_team, get_default_stats())
-        away_stats = TEAM_STATS.get(away_team, get_default_stats())
-        
-        # Predict
-        home_prob, away_prob = predict_game(home_stats, away_stats)
+        try:
+            home_team = game['home_team']
+            away_team = game['away_team']
+
+            # Get team stats from demo data, fallback to defaults
+            home_stats = DEMO_TEAM_STATS.get(home_team, get_default_stats())
+            away_stats = DEMO_TEAM_STATS.get(away_team, get_default_stats())
+
+            # Predict with error handling
+            home_prob, away_prob = predict_game(home_stats, away_stats)
         
         # Get best odds
         best_home_odds = -150
@@ -137,115 +149,127 @@ with tab1:
                 if odds > best_away_odds:
                     best_away_odds = odds
         
-        # Calculate edge
-        home_implied = american_to_implied_prob(best_home_odds)
-        away_implied = american_to_implied_prob(best_away_odds)
-        home_edge = calculate_edge(home_prob, home_implied)
-        away_edge = calculate_edge(away_prob, away_implied)
-        
-        # Display game card
-        with st.container():
-            col1, col2, col3 = st.columns([2, 1, 2])
-            
-            # Get prediction with confidence intervals
-            pred_ci = predict_with_confidence(home_stats, away_stats, home_team, away_team)
-            
-            with col1:
-                st.subheader(f"🏠 {home_team}")
-                st.metric("Model Probability", f"{home_prob:.1%}")
-                st.caption(f"95% CI: [{pred_ci.home_ci_low:.1%} - {pred_ci.home_ci_high:.1%}]")
-                st.metric("Best Odds", f"{best_home_odds:+d}")
-                st.metric("Implied Probability", f"{home_implied:.1%}")
-                if home_edge > 0:
-                    st.success(f"Edge: +{home_edge:.1f}%")
-                else:
-                    st.error(f"Edge: {home_edge:.1f}%")
-            
-            with col2:
-                st.markdown("<br><br>", unsafe_allow_html=True)
-                st.markdown("### VS")
-                predicted_winner = home_team if home_prob > 0.5 else away_team
-                confidence = max(home_prob, away_prob)
-                st.info(f"Pick: **{predicted_winner}**\n\nConfidence: {confidence:.1%}")
-            
-            with col3:
-                st.subheader(f"✈️ {away_team}")
-                st.metric("Model Probability", f"{away_prob:.1%}")
-                st.caption(f"95% CI: [{pred_ci.away_ci_low:.1%} - {pred_ci.away_ci_high:.1%}]")
-                st.metric("Best Odds", f"{best_away_odds:+d}")
-                st.metric("Implied Probability", f"{away_implied:.1%}")
-                if away_edge > 0:
-                    st.success(f"Edge: +{away_edge:.1f}%")
-                else:
-                    st.error(f"Edge: {away_edge:.1f}%")
-            
-            st.markdown("---")
+            # Calculate edge
+            home_implied = american_to_implied_prob(best_home_odds)
+            away_implied = american_to_implied_prob(best_away_odds)
+            home_edge = calculate_edge(home_prob, home_implied)
+            away_edge = calculate_edge(away_prob, away_implied)
+
+            # Display game card
+            with st.container():
+                col1, col2, col3 = st.columns([2, 1, 2])
+
+                # Get prediction with confidence intervals
+                pred_ci = predict_with_confidence(home_stats, away_stats, home_team, away_team)
+
+                with col1:
+                    st.subheader(f"🏠 {home_team}")
+                    st.metric("Model Probability", f"{home_prob:.1%}")
+                    st.caption(f"95% CI: [{pred_ci.home_ci_low:.1%} - {pred_ci.home_ci_high:.1%}]")
+                    st.metric("Best Odds", f"{best_home_odds:+d}")
+                    st.metric("Implied Probability", f"{home_implied:.1%}")
+                    if home_edge > 0:
+                        st.success(f"Edge: +{home_edge:.1f}%")
+                    else:
+                        st.error(f"Edge: {home_edge:.1f}%")
+
+                with col2:
+                    st.markdown("<br><br>", unsafe_allow_html=True)
+                    st.markdown("### VS")
+                    predicted_winner = home_team if home_prob > 0.5 else away_team
+                    confidence = max(home_prob, away_prob)
+                    st.info(f"Pick: **{predicted_winner}**\n\nConfidence: {confidence:.1%}")
+
+                with col3:
+                    st.subheader(f"✈️ {away_team}")
+                    st.metric("Model Probability", f"{away_prob:.1%}")
+                    st.caption(f"95% CI: [{pred_ci.away_ci_low:.1%} - {pred_ci.away_ci_high:.1%}]")
+                    st.metric("Best Odds", f"{best_away_odds:+d}")
+                    st.metric("Implied Probability", f"{away_implied:.1%}")
+                    if away_edge > 0:
+                        st.success(f"Edge: +{away_edge:.1f}%")
+                    else:
+                        st.error(f"Edge: {away_edge:.1f}%")
+
+                st.markdown("---")
+
+        except Exception as e:
+            st.error(f"Error processing game {game.get('home_team', 'Unknown')} vs {game.get('away_team', 'Unknown')}: {str(e)}")
+            continue
 
 with tab2:
     st.header("🎯 Value Bets")
     st.markdown(f"*Showing bets with edge >= {min_edge}%*")
-    
+
+    if is_demo:
+        st.info("Currently showing demo data. Set ODDS_API_KEY in .env to use live data.")
+
     value_bets = []
-    
+
     for game in games:
-        home_team = game['home_team']
-        away_team = game['away_team']
-        
-        home_stats = TEAM_STATS.get(home_team, get_default_stats())
-        away_stats = TEAM_STATS.get(away_team, get_default_stats())
-        
-        home_prob, away_prob = predict_game(home_stats, away_stats)
-        
-        # Get best odds
-        best_home_odds = -150
-        best_away_odds = 130
-        
-        for book in game.get('bookmakers', []):
-            h2h = book.get('markets', {}).get('h2h', {})
-            if home_team in h2h:
-                odds = h2h[home_team].get('price', -150)
-                if odds > best_home_odds:
-                    best_home_odds = odds
-            if away_team in h2h:
-                odds = h2h[away_team].get('price', 130)
-                if odds > best_away_odds:
-                    best_away_odds = odds
-        
-        # Check home team
-        home_implied = american_to_implied_prob(best_home_odds)
-        home_edge = calculate_edge(home_prob, home_implied)
-        if home_edge >= min_edge:
-            decimal_odds = american_to_decimal(best_home_odds)
-            kelly_bet = kelly_criterion(home_prob, decimal_odds, kelly_fraction)
-            value_bets.append({
-                'team': home_team,
-                'opponent': away_team,
-                'location': 'Home',
-                'model_prob': home_prob,
-                'implied_prob': home_implied,
-                'odds': best_home_odds,
-                'edge': home_edge,
-                'kelly_pct': kelly_bet,
-                'bet_amount': kelly_bet * bankroll
-            })
-        
-        # Check away team
-        away_implied = american_to_implied_prob(best_away_odds)
-        away_edge = calculate_edge(away_prob, away_implied)
-        if away_edge >= min_edge:
-            decimal_odds = american_to_decimal(best_away_odds)
-            kelly_bet = kelly_criterion(away_prob, decimal_odds, kelly_fraction)
-            value_bets.append({
-                'team': away_team,
-                'opponent': home_team,
-                'location': 'Away',
-                'model_prob': away_prob,
-                'implied_prob': away_implied,
-                'odds': best_away_odds,
-                'edge': away_edge,
-                'kelly_pct': kelly_bet,
-                'bet_amount': kelly_bet * bankroll
-            })
+        try:
+            home_team = game['home_team']
+            away_team = game['away_team']
+
+            home_stats = DEMO_TEAM_STATS.get(home_team, get_default_stats())
+            away_stats = DEMO_TEAM_STATS.get(away_team, get_default_stats())
+
+            home_prob, away_prob = predict_game(home_stats, away_stats)
+
+            # Get best odds
+            best_home_odds = -150
+            best_away_odds = 130
+
+            for book in game.get('bookmakers', []):
+                h2h = book.get('markets', {}).get('h2h', {})
+                if home_team in h2h:
+                    odds = h2h[home_team].get('price', -150)
+                    if odds > best_home_odds:
+                        best_home_odds = odds
+                if away_team in h2h:
+                    odds = h2h[away_team].get('price', 130)
+                    if odds > best_away_odds:
+                        best_away_odds = odds
+
+            # Check home team
+            home_implied = american_to_implied_prob(best_home_odds)
+            home_edge = calculate_edge(home_prob, home_implied)
+            if home_edge >= min_edge:
+                decimal_odds = american_to_decimal(best_home_odds)
+                kelly_bet = kelly_criterion(home_prob, decimal_odds, kelly_fraction)
+                value_bets.append({
+                    'team': home_team,
+                    'opponent': away_team,
+                    'location': 'Home',
+                    'model_prob': home_prob,
+                    'implied_prob': home_implied,
+                    'odds': best_home_odds,
+                    'edge': home_edge,
+                    'kelly_pct': kelly_bet,
+                    'bet_amount': kelly_bet * bankroll
+                })
+
+            # Check away team
+            away_implied = american_to_implied_prob(best_away_odds)
+            away_edge = calculate_edge(away_prob, away_implied)
+            if away_edge >= min_edge:
+                decimal_odds = american_to_decimal(best_away_odds)
+                kelly_bet = kelly_criterion(away_prob, decimal_odds, kelly_fraction)
+                value_bets.append({
+                    'team': away_team,
+                    'opponent': home_team,
+                    'location': 'Away',
+                    'model_prob': away_prob,
+                    'implied_prob': away_implied,
+                    'odds': best_away_odds,
+                    'edge': away_edge,
+                    'kelly_pct': kelly_bet,
+                    'bet_amount': kelly_bet * bankroll
+                })
+
+        except Exception as e:
+            st.warning(f"Error processing value bets for {game.get('home_team', 'Unknown')} vs {game.get('away_team', 'Unknown')}")
+            continue
     
     if value_bets:
         # Sort by edge
