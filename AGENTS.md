@@ -25,12 +25,12 @@ docs/                # Documentation
 demo.gif             # Demo recording
 Dockerfile           # Container definition
 docker-compose.yml   # Multi-container setup
-.env.example         # Environment variable template
+env.example         # Environment variable template
 ```
 
 ## Key Conventions
 - Related to ai-advantage repo (frontend) and openclaw-skills/sports-odds (OpenClaw skill)
-- Uses .env for API keys (copy .env.example)
+- Uses .env for API keys (copy env.example)
 - Has GitHub Actions CI (.github/)
 
 ## Owner
