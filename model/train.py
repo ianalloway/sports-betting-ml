@@ -2,7 +2,6 @@
 
 import pandas as pd
 import numpy as np
-import joblib
 from pathlib import Path
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score, classification_report
@@ -205,8 +204,8 @@ def main():
     model = train_model(X, y)
     
     # Save model
-    model_path = MODEL_DIR / "model.pkl"
-    joblib.dump(model, model_path)
+    model_path = MODEL_DIR / "model.json"
+    model.save_model(str(model_path))
     print(f"Model saved to {model_path}")
     
     # Feature importance
