@@ -1,4 +1,4 @@
-streamlit==1.56.0
+streamlit==1.57.0
 pandas==3.0.2
 numpy==2.4.4
 scikit-learn==1.8.0
@@ -6,6 +6,6 @@ xgboost==3.2.0
 scipy==1.17.1
 requests==2.33.1
 nba_api==1.11.4
-plotly==6.6.0
+plotly==6.7.0
 python-dotenv==1.2.2
 joblib==1.5.3
