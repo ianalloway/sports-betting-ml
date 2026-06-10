@@ -1,7 +1,6 @@
 """Prediction functions for NBA game outcomes."""
 
 import os
-import joblib
 import numpy as np
 import pandas as pd
 from typing import Optional, Tuple, Dict
@@ -13,10 +12,19 @@ MODEL_DIR = Path(__file__).parent
 
 
 def load_model():
-    """Load the trained model."""
-    model_path = MODEL_DIR / "model.pkl"
+    """Load the trained model from XGBoost's native (safe) format.
+
+    Pickle/joblib loading was removed: unpickling can execute arbitrary
+    code, so a swapped model file meant remote code execution (issue #14).
+    XGBoost's native JSON format only deserializes model parameters.
+    """
+    model_path = MODEL_DIR / "model.json"
     if model_path.exists():
-        return joblib.load(model_path)
+        from xgboost import XGBClassifier
+
+        model = XGBClassifier()
+        model.load_model(str(model_path))
+        return model
     return None
 
 

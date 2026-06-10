@@ -55,7 +55,12 @@ def parse_odds(games: list) -> list:
     """
     parsed = []
     
+    if not isinstance(games, list):
+        return parsed
+
     for game in games:
+        if not isinstance(game, dict):
+            continue
         game_info = {
             "id": game.get("id"),
             "home_team": game.get("home_team"),
@@ -84,6 +89,10 @@ def parse_odds(games: list) -> list:
             
             game_info["bookmakers"].append(book_info)
         
+        # Skip malformed entries rather than crashing downstream consumers.
+        if not game_info["id"] or not game_info["home_team"] or not game_info["away_team"]:
+            continue
+
         parsed.append(game_info)
     
     return parsed

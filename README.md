@@ -106,7 +106,7 @@ sports-betting-ml/
 ├── model/
 │   ├── train.py        # Model training script
 │   ├── predict.py      # Prediction functions
-│   └── model.pkl       # Trained model
+│   └── model.json      # Trained model (XGBoost native format)
 ├── data/
 │   ├── fetch_data.py   # Data collection
 │   └── features.py     # Feature engineering

@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Train the model on startup (creates model.pkl)
+# Train the model on startup (creates model.json)
 RUN python -c "from model.train import main; main()"
 
 # Expose port
