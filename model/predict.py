@@ -96,20 +96,17 @@ def predict_heuristic(home_stats: dict, away_stats: dict) -> Tuple[float, float]
 
 
 def create_features(home_stats: dict, away_stats: dict) -> dict:
-    """Create feature dictionary for prediction."""
-    return {
-        'home_win_pct': home_stats.get('win_pct', 0.5),
-        'away_win_pct': away_stats.get('win_pct', 0.5),
-        'home_ppg': home_stats.get('avg_points_for', 110),
-        'away_ppg': away_stats.get('avg_points_for', 110),
-        'home_opp_ppg': home_stats.get('avg_points_against', 110),
-        'away_opp_ppg': away_stats.get('avg_points_against', 110),
-        'home_point_diff': home_stats.get('point_diff', 0),
-        'away_point_diff': away_stats.get('point_diff', 0),
-        'win_pct_diff': home_stats.get('win_pct', 0.5) - away_stats.get('win_pct', 0.5),
-        'point_diff_diff': home_stats.get('point_diff', 0) - away_stats.get('point_diff', 0),
-        'home_advantage': 1
-    }
+    """Create feature dictionary for prediction.
+
+    Delegates to data.features.create_game_features so training and
+    serving share one feature definition (no train/serve skew, issue #28).
+    Missing stats are filled with the same defaults used in training.
+    """
+    from data.features import create_game_features
+
+    home = {**get_default_stats(), **home_stats}
+    away = {**get_default_stats(), **away_stats}
+    return create_game_features('home', 'away', home, away)
 
 
 def batch_predict(games: list, team_stats: dict, model=None) -> list:

@@ -1,13 +1,25 @@
 """Model training script for NBA game prediction."""
 
+import sys
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import (
+    accuracy_score,
+    brier_score_loss,
+    classification_report,
+    log_loss,
+)
 from xgboost import XGBClassifier
 
 MODEL_DIR = Path(__file__).parent
+
+# Make the repo root importable so this works both as a module
+# (python -m model.train) and as a script (python model/train.py).
+sys.path.insert(0, str(MODEL_DIR.parent))
+
+from data.features import prepare_training_data  # noqa: E402
 
 
 def create_sample_data() -> pd.DataFrame:
@@ -16,7 +28,7 @@ def create_sample_data() -> pd.DataFrame:
     In production, this would fetch from NBA API.
     """
     np.random.seed(42)
-    
+
     teams = [
         'Boston Celtics', 'Milwaukee Bucks', 'Philadelphia 76ers', 'Cleveland Cavaliers',
         'New York Knicks', 'Brooklyn Nets', 'Miami Heat', 'Atlanta Hawks',
@@ -27,7 +39,7 @@ def create_sample_data() -> pd.DataFrame:
         'New Orleans Pelicans', 'Dallas Mavericks', 'Utah Jazz', 'Minnesota Timberwolves',
         'Oklahoma City Thunder', 'Portland Trail Blazers', 'San Antonio Spurs', 'Houston Rockets'
     ]
-    
+
     # Team strength ratings (higher = better)
     team_strength = {team: np.random.uniform(0.3, 0.7) for team in teams}
     # Make some teams clearly better
@@ -37,144 +49,104 @@ def create_sample_data() -> pd.DataFrame:
     team_strength['Phoenix Suns'] = 0.68
     team_strength['Detroit Pistons'] = 0.28
     team_strength['San Antonio Spurs'] = 0.30
-    
+
+    # Valid, chronologically increasing dates (~8 games per day).
+    # The old formula produced impossible dates like month 20, which
+    # made "sort by date" meaningless for time-series evaluation.
+    season_start = pd.Timestamp('2024-10-22')
+
     games = []
-    
+
     # Generate 2000 sample games
     for i in range(2000):
         home_team = np.random.choice(teams)
         away_team = np.random.choice([t for t in teams if t != home_team])
-        
-        # Home advantage factor
-        home_advantage = 0.03
-        
+
         # Calculate expected scores based on team strength
         home_strength = team_strength[home_team]
         away_strength = team_strength[away_team]
-        
+
         # Base scores around 110 points
         home_base = 100 + home_strength * 30
         away_base = 100 + away_strength * 30
-        
+
         # Add randomness
         home_score = int(home_base + np.random.normal(0, 10))
         away_score = int(away_base + np.random.normal(0, 10))
-        
+
         # Home advantage adds ~3 points
         home_score += int(np.random.normal(3, 1))
-        
+
         games.append({
-            'date': f'2025-{(i // 100) + 1:02d}-{(i % 28) + 1:02d}',
+            'date': (season_start + pd.Timedelta(days=i // 8)).strftime('%Y-%m-%d'),
             'home_team': home_team,
             'away_team': away_team,
             'home_score': max(80, home_score),
             'away_score': max(80, away_score)
         })
-    
+
     return pd.DataFrame(games)
 
 
-def calculate_rolling_stats(df: pd.DataFrame, team: str, idx: int, n_games: int = 10) -> dict:
-    """Calculate rolling statistics for a team up to a given index."""
-    team_games = df.iloc[:idx][
-        (df.iloc[:idx]['home_team'] == team) | (df.iloc[:idx]['away_team'] == team)
-    ].tail(n_games)
-    
-    if len(team_games) < 3:
-        return {
-            'win_pct': 0.5,
-            'avg_points_for': 110,
-            'avg_points_against': 110,
-            'point_diff': 0
-        }
-    
-    wins = 0
-    points_for = []
-    points_against = []
-    
-    for _, game in team_games.iterrows():
-        if game['home_team'] == team:
-            points_for.append(game['home_score'])
-            points_against.append(game['away_score'])
-            if game['home_score'] > game['away_score']:
-                wins += 1
-        else:
-            points_for.append(game['away_score'])
-            points_against.append(game['home_score'])
-            if game['away_score'] > game['home_score']:
-                wins += 1
-    
-    return {
-        'win_pct': wins / len(team_games),
-        'avg_points_for': np.mean(points_for),
-        'avg_points_against': np.mean(points_against),
-        'point_diff': np.mean(points_for) - np.mean(points_against)
-    }
-
-
-def prepare_features(df: pd.DataFrame) -> tuple:
-    """Prepare features and targets from game data."""
-    features = []
-    targets = []
-    
-    # Start from game 50 to have enough history
-    for i in range(50, len(df)):
-        game = df.iloc[i]
-        
-        home_stats = calculate_rolling_stats(df, game['home_team'], i)
-        away_stats = calculate_rolling_stats(df, game['away_team'], i)
-        
-        feature_dict = {
-            'home_win_pct': home_stats['win_pct'],
-            'away_win_pct': away_stats['win_pct'],
-            'home_ppg': home_stats['avg_points_for'],
-            'away_ppg': away_stats['avg_points_for'],
-            'home_opp_ppg': home_stats['avg_points_against'],
-            'away_opp_ppg': away_stats['avg_points_against'],
-            'home_point_diff': home_stats['point_diff'],
-            'away_point_diff': away_stats['point_diff'],
-            'win_pct_diff': home_stats['win_pct'] - away_stats['win_pct'],
-            'point_diff_diff': home_stats['point_diff'] - away_stats['point_diff'],
-            'home_advantage': 1
-        }
-        
-        features.append(feature_dict)
-        targets.append(1 if game['home_score'] > game['away_score'] else 0)
-    
-    return pd.DataFrame(features), pd.Series(targets)
-
-
-def train_model(X: pd.DataFrame, y: pd.Series) -> XGBClassifier:
-    """Train the XGBoost model."""
-    model = XGBClassifier(
+def build_model() -> XGBClassifier:
+    """Construct an untrained XGBoost model with the standard params."""
+    return XGBClassifier(
         n_estimators=100,
         max_depth=4,
         learning_rate=0.1,
         subsample=0.8,
         colsample_bytree=0.8,
         random_state=42,
-        use_label_encoder=False,
         eval_metric='logloss'
     )
-    
+
+
+def train_model(X: pd.DataFrame, y: pd.Series) -> XGBClassifier:
+    """Train the XGBoost model."""
+    model = build_model()
     model.fit(X, y)
     return model
 
 
-def evaluate_model(model: XGBClassifier, X: pd.DataFrame, y: pd.Series) -> dict:
-    """Evaluate model performance."""
-    # Cross-validation
-    cv_scores = cross_val_score(model, X, y, cv=5, scoring='accuracy')
-    
-    # Train/test split evaluation
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+def evaluate_model(X: pd.DataFrame, y: pd.Series) -> dict:
+    """Evaluate with a chronological holdout and walk-forward CV.
+
+    Rows are time-ordered and every game's rolling features are built
+    from earlier games only. A random train/test split therefore leaks:
+    training games that happen *after* a test game carry that game's
+    outcome inside their rolling statistics, inflating test accuracy.
+    All splits here keep training data strictly earlier than evaluation
+    data (issue #28).
+    """
+    # Walk-forward cross-validation: each fold trains on the past and
+    # validates on the next, unseen block of games.
+    cv_scores = []
+    for train_idx, val_idx in TimeSeriesSplit(n_splits=5).split(X):
+        fold_model = build_model()
+        fold_model.fit(X.iloc[train_idx], y.iloc[train_idx])
+        fold_pred = fold_model.predict(X.iloc[val_idx])
+        cv_scores.append(accuracy_score(y.iloc[val_idx], fold_pred))
+    cv_scores = np.asarray(cv_scores)
+
+    # Chronological holdout: train on the first 80% of the season,
+    # test on the most recent 20%.
+    split = int(len(X) * 0.8)
+    X_train, X_test = X.iloc[:split], X.iloc[split:]
+    y_train, y_test = y.iloc[:split], y.iloc[split:]
+
+    model = build_model()
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    
+    y_prob = model.predict_proba(X_test)[:, 1]
+
     return {
         'cv_mean': cv_scores.mean(),
         'cv_std': cv_scores.std(),
         'test_accuracy': accuracy_score(y_test, y_pred),
+        # Probability quality matters more than accuracy for bet sizing:
+        # Kelly stakes are driven by the predicted probabilities.
+        'test_log_loss': log_loss(y_test, y_prob),
+        'test_brier': brier_score_loss(y_test, y_prob),
         'classification_report': classification_report(y_test, y_pred)
     }
 
@@ -183,31 +155,32 @@ def main():
     """Main training pipeline."""
     print("Creating sample data...")
     df = create_sample_data()
-    
+
     print("Preparing features...")
-    X, y = prepare_features(df)
+    # Single source of truth for feature engineering (data/features.py),
+    # shared with serving to avoid train/serve skew (issue #28).
+    X, y = prepare_training_data(df)
     print(f"Dataset size: {len(X)} games")
-    
-    print("Training model...")
-    model = train_model(X, y)
-    
-    print("Evaluating model...")
-    metrics = evaluate_model(model, X, y)
-    
-    print(f"\nCross-validation accuracy: {metrics['cv_mean']:.3f} (+/- {metrics['cv_std']:.3f})")
-    print(f"Test accuracy: {metrics['test_accuracy']:.3f}")
+
+    print("Evaluating model (walk-forward CV + chronological holdout)...")
+    metrics = evaluate_model(X, y)
+
+    print(f"\nWalk-forward CV accuracy: {metrics['cv_mean']:.3f} (+/- {metrics['cv_std']:.3f})")
+    print(f"Holdout accuracy (most recent 20%): {metrics['test_accuracy']:.3f}")
+    print(f"Holdout log loss: {metrics['test_log_loss']:.3f}")
+    print(f"Holdout Brier score: {metrics['test_brier']:.3f}")
     print("\nClassification Report:")
     print(metrics['classification_report'])
-    
-    # Retrain on full data
-    print("\nRetraining on full dataset...")
+
+    # Train the final model on the full dataset
+    print("Training final model on full dataset...")
     model = train_model(X, y)
-    
+
     # Save model
     model_path = MODEL_DIR / "model.json"
     model.save_model(str(model_path))
     print(f"Model saved to {model_path}")
-    
+
     # Feature importance
     print("\nFeature Importance:")
     importance = pd.DataFrame({
@@ -215,7 +188,7 @@ def main():
         'importance': model.feature_importances_
     }).sort_values('importance', ascending=False)
     print(importance.to_string(index=False))
-    
+
     return model
 
 
