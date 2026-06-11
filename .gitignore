@@ -70,3 +70,6 @@ Thumbs.db
 !env.example
 *.pem
 *.key
+
+# Trained model artifact (built in CI / at runtime, not committed)
+model/model.json
