@@ -14,11 +14,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Train the model on startup (creates model.json)
-RUN python -c "from model.train import main; main()"
+# No training at build time (issue #28): training in the image build made
+# builds slow and non-reproducible. The entrypoint uses a CI-trained
+# artifact mounted at /app/model/artifacts and only trains a fallback
+# model at startup when no artifact is present.
 
 # Expose port
 EXPOSE 7860
 
-# Run Streamlit
-CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0", "--server.headless=true"]
+ENTRYPOINT ["./docker/entrypoint.sh"]

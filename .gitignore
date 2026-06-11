@@ -73,3 +73,4 @@ Thumbs.db
 
 # Trained model artifact (built in CI / at runtime, not committed)
 model/model.json
+model/artifacts/

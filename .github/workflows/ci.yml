@@ -46,9 +46,19 @@ jobs:
       run: |
         python -c "import streamlit; import pandas; import numpy; import xgboost; print('All imports successful')"
 
-    - name: Verify model training
+    - name: Train model (full pipeline)
+      # Training happens here in CI, not inside the Docker build (issue
+      # #28). The resulting artifact is uploaded so deployments can mount
+      # it instead of retraining in every image build.
       run: |
-        python -c "from model.train import create_sample_data, train_model; from data.features import prepare_training_data; df = create_sample_data(); X, y = prepare_training_data(df); model = train_model(X, y); print(f'Model trained with {len(X)} samples')"
+        python -m model.train
+
+    - name: Upload model artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: model-artifact
+        path: model/artifacts/model.json
+        retention-days: 30
 
     - name: Verify prediction functions
       run: |

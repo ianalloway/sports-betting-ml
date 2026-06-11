@@ -7,6 +7,8 @@ from typing import Optional, Tuple, Dict
 from pathlib import Path
 from dataclasses import dataclass
 
+from model import model_artifact_path
+
 # Get the model directory
 MODEL_DIR = Path(__file__).parent
 
@@ -18,7 +20,7 @@ def load_model():
     code, so a swapped model file meant remote code execution (issue #14).
     XGBoost's native JSON format only deserializes model parameters.
     """
-    model_path = MODEL_DIR / "model.json"
+    model_path = model_artifact_path()
     if model_path.exists():
         from xgboost import XGBClassifier
 

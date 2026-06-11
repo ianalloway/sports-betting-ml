@@ -20,6 +20,7 @@ MODEL_DIR = Path(__file__).parent
 sys.path.insert(0, str(MODEL_DIR.parent))
 
 from data.features import prepare_training_data  # noqa: E402
+from model import model_artifact_path  # noqa: E402
 
 
 def create_sample_data() -> pd.DataFrame:
@@ -176,8 +177,9 @@ def main():
     print("Training final model on full dataset...")
     model = train_model(X, y)
 
-    # Save model
-    model_path = MODEL_DIR / "model.json"
+    # Save model to the shared artifact location (MODEL_PATH overrides)
+    model_path = model_artifact_path()
+    model_path.parent.mkdir(parents=True, exist_ok=True)
     model.save_model(str(model_path))
     print(f"Model saved to {model_path}")
 
