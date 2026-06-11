@@ -48,7 +48,7 @@ jobs:
 
     - name: Verify model training
       run: |
-        python -c "from model.train import create_sample_data, prepare_features, train_model; df = create_sample_data(); X, y = prepare_features(df); model = train_model(X, y); print(f'Model trained with {len(X)} samples')"
+        python -c "from model.train import create_sample_data, train_model; from data.features import prepare_training_data; df = create_sample_data(); X, y = prepare_training_data(df); model = train_model(X, y); print(f'Model trained with {len(X)} samples')"
 
     - name: Verify prediction functions
       run: |
