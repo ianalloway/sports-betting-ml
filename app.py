@@ -133,22 +133,22 @@ with tab1:
 
             # Predict with error handling
             home_prob, away_prob = predict_game(home_stats, away_stats)
-        
-        # Get best odds
-        best_home_odds = -150
-        best_away_odds = 130
-        
-        for book in game.get('bookmakers', []):
-            h2h = book.get('markets', {}).get('h2h', {})
-            if home_team in h2h:
-                odds = h2h[home_team].get('price', -150)
-                if odds > best_home_odds:
-                    best_home_odds = odds
-            if away_team in h2h:
-                odds = h2h[away_team].get('price', 130)
-                if odds > best_away_odds:
-                    best_away_odds = odds
-        
+
+            # Get best odds
+            best_home_odds = -150
+            best_away_odds = 130
+
+            for book in game.get('bookmakers', []):
+                h2h = book.get('markets', {}).get('h2h', {})
+                if home_team in h2h:
+                    odds = h2h[home_team].get('price', -150)
+                    if odds > best_home_odds:
+                        best_home_odds = odds
+                if away_team in h2h:
+                    odds = h2h[away_team].get('price', 130)
+                    if odds > best_away_odds:
+                        best_away_odds = odds
+
             # Calculate edge
             home_implied = american_to_implied_prob(best_home_odds)
             away_implied = american_to_implied_prob(best_away_odds)
