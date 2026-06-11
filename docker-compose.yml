@@ -12,7 +12,9 @@ services:
       - STREAMLIT_SERVER_PORT=7860
       - STREAMLIT_SERVER_ADDRESS=0.0.0.0
     volumes:
-      - model_data:/app/model
+      # Mount only the artifact directory. Mounting /app/model shadowed
+      # the package's code with stale volume contents.
+      - model_data:/app/model/artifacts
 
   # Development service with hot reload
   dev:
