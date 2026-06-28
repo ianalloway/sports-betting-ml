@@ -66,7 +66,7 @@ This is the modeling side of the sports analytics story:
 ## Quick Start
 
 ### Prerequisites
-- Python 3.11+
+- Python 3.12+
 - pip
 
 ### Local Installation
