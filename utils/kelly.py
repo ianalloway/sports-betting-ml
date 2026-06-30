@@ -38,13 +38,13 @@ def kelly_criterion(win_prob: float, decimal_odds: float, fraction: float = 0.25
     p = win_prob
     # q = probability of losing
     q = 1 - p
-    
+
     # Kelly formula: f* = (bp - q) / b
     kelly = (b * p - q) / b
-    
+
     # Apply fractional Kelly for more conservative sizing
     kelly = kelly * fraction
-    
+
     # Never bet negative (no edge) or more than 100%
     return max(0, min(kelly, 1))
 
@@ -75,15 +75,15 @@ def find_value_bets(predictions: list, min_edge: float = 3.0) -> list:
         List of value bets with calculated edge and Kelly bet size
     """
     value_bets = []
-    
+
     for pred in predictions:
         implied_prob = american_to_implied_prob(pred['american_odds'])
         edge = calculate_edge(pred['model_prob'], implied_prob)
-        
+
         if edge >= min_edge:
             decimal_odds = american_to_decimal(pred['american_odds'])
             kelly_bet = kelly_criterion(pred['model_prob'], decimal_odds)
-            
+
             value_bets.append({
                 **pred,
                 'implied_prob': implied_prob,
@@ -91,7 +91,7 @@ def find_value_bets(predictions: list, min_edge: float = 3.0) -> list:
                 'kelly_bet': kelly_bet,
                 'decimal_odds': decimal_odds
             })
-    
+
     # Sort by edge descending
     value_bets.sort(key=lambda x: x['edge'], reverse=True)
     return value_bets

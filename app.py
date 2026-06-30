@@ -6,9 +6,7 @@ A Streamlit app for predicting NBA game outcomes and finding value bets.
 import streamlit as st
 import pandas as pd
 import numpy as np
-from datetime import datetime
 import plotly.express as px
-import plotly.graph_objects as go
 
 from utils.kelly import (
     american_to_decimal,
@@ -16,7 +14,7 @@ from utils.kelly import (
     kelly_criterion,
     calculate_edge
 )
-from utils.odds import get_nba_odds, parse_odds, get_best_odds
+from utils.odds import get_nba_odds, parse_odds
 from model.predict import predict_game, get_default_stats, predict_with_confidence
 
 # Page config
@@ -120,7 +118,7 @@ with tab1:
         raw_odds = get_nba_odds()  # This will return demo data on error
         games = parse_odds(raw_odds) if raw_odds else []
         is_demo = True
-    
+
     # Display games
     for game in games:
         try:
@@ -267,14 +265,14 @@ with tab2:
                     'bet_amount': kelly_bet * bankroll
                 })
 
-        except Exception as e:
+        except Exception:
             st.warning(f"Error processing value bets for {game.get('home_team', 'Unknown')} vs {game.get('away_team', 'Unknown')}")
             continue
-    
+
     if value_bets:
         # Sort by edge
         value_bets.sort(key=lambda x: x['edge'], reverse=True)
-        
+
         # Summary metrics
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -285,9 +283,9 @@ with tab2:
         with col3:
             avg_edge = np.mean([b['edge'] for b in value_bets])
             st.metric("Average Edge", f"+{avg_edge:.1f}%")
-        
+
         st.markdown("---")
-        
+
         # Display value bets
         for bet in value_bets:
             with st.container():
@@ -296,7 +294,7 @@ with tab2:
                     <h3>✅ {bet['team']} ({bet['location']}) vs {bet['opponent']}</h3>
                 </div>
                 """, unsafe_allow_html=True)
-                
+
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.metric("Model Probability", f"{bet['model_prob']:.1%}")
@@ -306,14 +304,14 @@ with tab2:
                     st.metric("Edge", f"+{bet['edge']:.1f}%")
                 with col4:
                     st.metric("Suggested Bet", f"${bet['bet_amount']:.2f}")
-                
+
                 st.markdown("---")
     else:
         st.info(f"No value bets found with edge >= {min_edge}%. Try lowering the minimum edge threshold.")
 
 with tab3:
     st.header("📈 Model Information")
-    
+
     st.markdown("""
     ### How the Model Works
     
@@ -328,7 +326,7 @@ with tab3:
     
     #### Model Performance:
     """)
-    
+
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Accuracy", "~68%")
@@ -336,7 +334,7 @@ with tab3:
         st.metric("Backtested ROI", "+5.2%")
     with col3:
         st.metric("Sharpe Ratio", "1.3")
-    
+
     st.markdown("""
     #### Value Betting Strategy
     
@@ -363,17 +361,17 @@ with tab3:
     
     We use **fractional Kelly** (default 25%) for more conservative sizing.
     """)
-    
+
     # Feature importance chart
     st.subheader("Feature Importance")
-    
+
     importance_data = pd.DataFrame({
-        'Feature': ['Point Diff Difference', 'Win Pct Difference', 'Home Point Diff', 
+        'Feature': ['Point Diff Difference', 'Win Pct Difference', 'Home Point Diff',
                    'Away Point Diff', 'Home Win Pct', 'Away Win Pct', 'Home PPG',
                    'Away PPG', 'Home Opp PPG', 'Away Opp PPG', 'Home Advantage'],
         'Importance': [0.25, 0.20, 0.12, 0.11, 0.08, 0.07, 0.05, 0.04, 0.03, 0.03, 0.02]
     })
-    
+
     fig = px.bar(importance_data, x='Importance', y='Feature', orientation='h',
                  title='Feature Importance in Prediction Model')
     fig.update_layout(yaxis={'categoryorder': 'total ascending'})

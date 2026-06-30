@@ -21,15 +21,15 @@ def calculate_team_stats(games_df: pd.DataFrame, team: str, n_games: int = 10) -
     team_games = games_df[
         (games_df['home_team'] == team) | (games_df['away_team'] == team)
     ].tail(n_games)
-    
+
     if len(team_games) == 0:
         return get_default_stats()
-    
+
     # Calculate wins
     wins = 0
     points_for = []
     points_against = []
-    
+
     for _, game in team_games.iterrows():
         if game['home_team'] == team:
             points_for.append(game['home_score'])
@@ -41,7 +41,7 @@ def calculate_team_stats(games_df: pd.DataFrame, team: str, n_games: int = 10) -
             points_against.append(game['home_score'])
             if game['away_score'] > game['home_score']:
                 wins += 1
-    
+
     return {
         'win_pct': wins / len(team_games),
         'avg_points_for': np.mean(points_for),
@@ -107,28 +107,28 @@ def prepare_training_data(games_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Seri
     """
     features_list = []
     targets = []
-    
+
     # Sort by date
     games_df = games_df.sort_values('date').reset_index(drop=True)
-    
+
     # Need at least 20 games before we can make predictions
     for i in range(20, len(games_df)):
         game = games_df.iloc[i]
         historical = games_df.iloc[:i]
-        
+
         home_stats = calculate_team_stats(historical, game['home_team'])
         away_stats = calculate_team_stats(historical, game['away_team'])
-        
+
         features = create_game_features(
             game['home_team'],
             game['away_team'],
             home_stats,
             away_stats
         )
-        
+
         features_list.append(features)
         targets.append(1 if game['home_score'] > game['away_score'] else 0)
-    
+
     return pd.DataFrame(features_list), pd.Series(targets)
 
 

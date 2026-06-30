@@ -15,7 +15,7 @@ from .odds import (
 
 __all__ = [
     "american_to_decimal",
-    "decimal_to_implied_prob", 
+    "decimal_to_implied_prob",
     "american_to_implied_prob",
     "kelly_criterion",
     "calculate_edge",
