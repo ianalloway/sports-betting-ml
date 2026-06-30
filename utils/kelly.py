@@ -2,11 +2,17 @@
 
 
 def american_to_decimal(american_odds: int) -> float:
-    """Convert American odds to decimal odds."""
+    """Convert American odds to decimal odds.
+
+    American odds cannot be zero. Treating zero like a negative price would
+    divide by zero and surface as an unrelated downstream failure in Kelly or
+    implied-probability calculations.
+    """
+    if american_odds == 0:
+        raise ValueError("American odds cannot be zero")
     if american_odds > 0:
         return (american_odds / 100) + 1
-    else:
-        return (100 / abs(american_odds)) + 1
+    return (100 / abs(american_odds)) + 1
 
 
 def decimal_to_implied_prob(decimal_odds: float) -> float:
