@@ -36,12 +36,12 @@ def predict_game(
 ) -> Tuple[float, float]:
     """
     Predict the outcome of a game.
-    
+
     Args:
         home_stats: Home team statistics
         away_stats: Away team statistics
         model: Trained model (loads default if None)
-    
+
     Returns:
         Tuple of (home_win_prob, away_win_prob)
     """
@@ -113,12 +113,12 @@ def create_features(home_stats: dict, away_stats: dict) -> dict:
 def batch_predict(games: list, team_stats: dict, model=None) -> list:
     """
     Predict outcomes for multiple games.
-    
+
     Args:
         games: List of games with home_team and away_team
         team_stats: Dictionary of team statistics
         model: Trained model
-    
+
     Returns:
         List of predictions with probabilities
     """
@@ -192,15 +192,15 @@ def calculate_confidence_interval(
 ) -> Tuple[float, float]:
     """
     Calculate confidence interval for a probability estimate.
-    
+
     Uses the Wilson score interval which is more accurate for probabilities
     near 0 or 1 than the normal approximation.
-    
+
     Args:
         prob: Point estimate of probability
         n_samples: Effective sample size (higher = narrower CI)
         confidence_level: Confidence level (default 95%)
-    
+
     Returns:
         Tuple of (lower_bound, upper_bound)
     """
@@ -231,9 +231,9 @@ def predict_with_confidence(
 ) -> PredictionWithConfidence:
     """
     Predict game outcome with confidence intervals.
-    
+
     Uses bootstrap resampling to estimate prediction uncertainty.
-    
+
     Args:
         home_stats: Home team statistics
         away_stats: Away team statistics
@@ -242,7 +242,7 @@ def predict_with_confidence(
         model: Trained model (loads default if None)
         confidence_level: Confidence level for intervals (default 95%)
         n_bootstrap: Number of bootstrap samples
-    
+
     Returns:
         PredictionWithConfidence object with point estimates and intervals
     """
@@ -287,13 +287,13 @@ def batch_predict_with_confidence(
 ) -> list:
     """
     Predict outcomes for multiple games with confidence intervals.
-    
+
     Args:
         games: List of games with home_team and away_team
         team_stats: Dictionary of team statistics
         model: Trained model
         confidence_level: Confidence level for intervals
-    
+
     Returns:
         List of PredictionWithConfidence objects
     """

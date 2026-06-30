@@ -23,12 +23,12 @@ def american_to_implied_prob(american_odds: int) -> float:
 def kelly_criterion(win_prob: float, decimal_odds: float, fraction: float = 0.25) -> float:
     """
     Calculate optimal bet size using Kelly Criterion.
-    
+
     Args:
         win_prob: Model's estimated probability of winning (0-1)
         decimal_odds: Decimal odds offered by bookmaker
         fraction: Kelly fraction (0.25 = quarter Kelly, more conservative)
-    
+
     Returns:
         Optimal bet size as fraction of bankroll (0-1)
     """
@@ -52,11 +52,11 @@ def kelly_criterion(win_prob: float, decimal_odds: float, fraction: float = 0.25
 def calculate_edge(model_prob: float, implied_prob: float) -> float:
     """
     Calculate the edge (expected value) of a bet.
-    
+
     Args:
         model_prob: Model's estimated win probability
         implied_prob: Implied probability from odds
-    
+
     Returns:
         Edge as a percentage (positive = +EV)
     """
@@ -66,11 +66,11 @@ def calculate_edge(model_prob: float, implied_prob: float) -> float:
 def find_value_bets(predictions: list, min_edge: float = 3.0) -> list:
     """
     Find value bets where model probability exceeds implied probability.
-    
+
     Args:
         predictions: List of dicts with 'model_prob', 'american_odds', 'team', 'game'
         min_edge: Minimum edge percentage to consider a value bet
-    
+
     Returns:
         List of value bets with calculated edge and Kelly bet size
     """

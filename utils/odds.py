@@ -14,11 +14,11 @@ BASE_URL = "https://api.the-odds-api.com/v4"
 def get_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
     """
     Fetch current NBA odds from The Odds API.
-    
+
     Args:
         markets: Betting markets (h2h, spreads, totals)
         regions: Bookmaker regions (us, us2, uk, eu, au)
-    
+
     Returns:
         List of games with odds, or None if API call fails
     """
@@ -46,10 +46,10 @@ def get_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
 def parse_odds(games: list) -> list:
     """
     Parse odds data into a cleaner format.
-    
+
     Args:
         games: Raw games data from API
-    
+
     Returns:
         List of parsed game odds
     """
@@ -101,10 +101,10 @@ def parse_odds(games: list) -> list:
 def get_best_odds(games: list) -> list:
     """
     Get the best available odds for each team across all bookmakers.
-    
+
     Args:
         games: Parsed games data
-    
+
     Returns:
         List of games with best odds for each team
     """

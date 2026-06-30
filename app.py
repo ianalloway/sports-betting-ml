@@ -60,7 +60,7 @@ bankroll = st.sidebar.number_input("Bankroll ($)", min_value=100, value=1000, st
 st.sidebar.markdown("---")
 st.sidebar.markdown("### About")
 st.sidebar.markdown("""
-This app uses machine learning to predict NBA game outcomes and compares 
+This app uses machine learning to predict NBA game outcomes and compares
 predictions to betting odds to find value bets.
 
 **How it works:**
@@ -314,16 +314,16 @@ with tab3:
 
     st.markdown("""
     ### How the Model Works
-    
+
     This model uses **XGBoost** (Extreme Gradient Boosting) to predict NBA game outcomes.
-    
+
     #### Features Used:
     - **Win Percentage**: Team's recent win rate
     - **Points Per Game**: Offensive output
     - **Opponent PPG**: Defensive performance
     - **Point Differential**: Net rating proxy
     - **Home Court Advantage**: ~3 point boost for home teams
-    
+
     #### Model Performance:
     """)
 
@@ -337,28 +337,28 @@ with tab3:
 
     st.markdown("""
     #### Value Betting Strategy
-    
-    The model identifies **value bets** by comparing its predicted probability to the 
+
+    The model identifies **value bets** by comparing its predicted probability to the
     **implied probability** from betting odds.
-    
+
     **Example:**
     - Model predicts Team A wins 60% of the time
     - Odds of +150 imply only 40% win probability
     - Edge = 60% - 40% = **+20%** (strong value bet!)
-    
+
     #### Kelly Criterion
-    
+
     The **Kelly Criterion** calculates optimal bet sizing based on edge and odds:
-    
+
     ```
     f* = (bp - q) / b
-    
+
     where:
     b = decimal odds - 1
     p = probability of winning
     q = probability of losing
     ```
-    
+
     We use **fractional Kelly** (default 25%) for more conservative sizing.
     """)
 
@@ -381,8 +381,8 @@ with tab3:
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #666;'>
-    <p>⚠️ <strong>Disclaimer:</strong> This is for educational purposes only. 
-    Sports betting involves risk. Past performance does not guarantee future results. 
+    <p>⚠️ <strong>Disclaimer:</strong> This is for educational purposes only.
+    Sports betting involves risk. Past performance does not guarantee future results.
     Please gamble responsibly.</p>
     <p>Built by <a href="https://ianalloway.xyz">Ian Alloway</a></p>
 </div>

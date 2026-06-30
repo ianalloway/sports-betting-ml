@@ -8,12 +8,12 @@ from typing import Tuple
 def calculate_team_stats(games_df: pd.DataFrame, team: str, n_games: int = 10) -> dict:
     """
     Calculate rolling statistics for a team based on recent games.
-    
+
     Args:
         games_df: DataFrame with game results
         team: Team name
         n_games: Number of recent games to consider
-    
+
     Returns:
         Dictionary of team statistics
     """
@@ -70,13 +70,13 @@ def create_game_features(
 ) -> dict:
     """
     Create features for a single game prediction.
-    
+
     Args:
         home_team: Home team name
         away_team: Away team name
         home_stats: Home team statistics
         away_stats: Away team statistics
-    
+
     Returns:
         Dictionary of features for the game
     """
@@ -98,10 +98,10 @@ def create_game_features(
 def prepare_training_data(games_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
     """
     Prepare training data from historical games.
-    
+
     Args:
         games_df: DataFrame with historical game results
-    
+
     Returns:
         Tuple of (features DataFrame, target Series)
     """
