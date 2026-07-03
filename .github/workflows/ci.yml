@@ -27,7 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.11', '3.12']
+        # Project dependencies and Docker image require Python 3.12+.
+        python-version: ['3.12']
 
     steps:
     - uses: actions/checkout@v4
