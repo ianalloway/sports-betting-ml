@@ -1,9 +1,9 @@
 streamlit==1.58.0
 pandas==3.0.3
-numpy==2.4.6
+numpy==2.5.0
 scikit-learn==1.9.0
 xgboost==3.3.0
-scipy==1.17.1
+scipy==1.18.0
 requests==2.34.2
 nba_api==1.11.4
 plotly==6.8.0
