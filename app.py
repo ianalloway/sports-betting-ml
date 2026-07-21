@@ -17,6 +17,19 @@ from utils.kelly import (
 from utils.odds import get_nba_odds, parse_odds
 from model.predict import predict_game, get_default_stats, predict_with_confidence
 
+# Caching API calls and Model Loading
+@st.cache_data(ttl=300)
+def cached_get_nba_odds():
+    return get_nba_odds()
+
+@st.cache_resource
+def get_cached_model():
+    from model.predict import load_model
+    return load_model()
+
+# Load Model once for the page
+cached_model = get_cached_model()
+
 # Page config
 st.set_page_config(
     page_title="Sports Betting ML",
@@ -56,6 +69,10 @@ st.sidebar.header("Settings")
 min_edge = st.sidebar.slider("Minimum Edge (%)", 0.0, 10.0, 3.0, 0.5)
 kelly_fraction = st.sidebar.slider("Kelly Fraction", 0.1, 1.0, 0.25, 0.05)
 bankroll = st.sidebar.number_input("Bankroll ($)", min_value=100, value=1000, step=100)
+
+if st.sidebar.button("Refresh Odds"):
+    cached_get_nba_odds.clear()
+    st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### About")
@@ -104,7 +121,7 @@ with tab1:
     # Fetch odds with error handling
     try:
         with st.spinner("Fetching odds..."):
-            raw_odds = get_nba_odds()
+            raw_odds = cached_get_nba_odds()
             games = parse_odds(raw_odds) if raw_odds else []
 
         if not games:
@@ -115,7 +132,7 @@ with tab1:
     except Exception as e:
         st.error(f"Failed to fetch odds: {str(e)}")
         st.info("Using demo data for display purposes.")
-        raw_odds = get_nba_odds()  # This will return demo data on error
+        raw_odds = cached_get_nba_odds()  # This will return demo data on error
         games = parse_odds(raw_odds) if raw_odds else []
         is_demo = True
 
@@ -130,7 +147,7 @@ with tab1:
             away_stats = DEMO_TEAM_STATS.get(away_team, get_default_stats())
 
             # Predict with error handling
-            home_prob, away_prob = predict_game(home_stats, away_stats)
+            home_prob, away_prob = predict_game(home_stats, away_stats, model=cached_model)
 
             # Get best odds
             best_home_odds = -150
@@ -158,7 +175,7 @@ with tab1:
                 col1, col2, col3 = st.columns([2, 1, 2])
 
                 # Get prediction with confidence intervals
-                pred_ci = predict_with_confidence(home_stats, away_stats, home_team, away_team)
+                pred_ci = predict_with_confidence(home_stats, away_stats, home_team, away_team, model=cached_model)
 
                 with col1:
                     st.subheader(f"🏠 {home_team}")
@@ -212,7 +229,7 @@ with tab2:
             home_stats = DEMO_TEAM_STATS.get(home_team, get_default_stats())
             away_stats = DEMO_TEAM_STATS.get(away_team, get_default_stats())
 
-            home_prob, away_prob = predict_game(home_stats, away_stats)
+            home_prob, away_prob = predict_game(home_stats, away_stats, model=cached_model)
 
             # Get best odds
             best_home_odds = -150
