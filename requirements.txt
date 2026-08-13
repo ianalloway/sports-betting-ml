@@ -1,8 +1,8 @@
-streamlit==1.60.0
+streamlit==1.61.1
 pandas==3.0.5
-numpy==2.5.1
+numpy==2.5.2
 scikit-learn==1.9.0
-xgboost==3.3.0
+xgboost==3.4.0
 scipy==1.18.0
 requests==2.34.2
 nba_api==1.11.4
