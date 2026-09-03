@@ -40,6 +40,9 @@ def kelly_criterion(win_prob: float, decimal_odds: float, fraction: float = 0.25
     """
     # b = decimal odds - 1 (net odds received on win)
     b = decimal_odds - 1
+    if b <= 0:
+        # Decimal odds of 1.0 (or worse) imply no payout; Kelly is undefined.
+        return 0.0
     # p = probability of winning
     p = win_prob
     # q = probability of losing
