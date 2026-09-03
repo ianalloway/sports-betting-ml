@@ -83,6 +83,13 @@ streamlit run app.py
 
 The app opens at `http://localhost:8501`.
 
+Run the test suite with:
+
+```bash
+pip install pytest
+python -m pytest tests/ -v
+```
+
 ### Docker Installation
 
 ```bash
@@ -106,13 +113,14 @@ sports-betting-ml/
 ├── model/
 │   ├── train.py        # Model training script
 │   ├── predict.py      # Prediction functions
-│   └── model.json      # Trained model (XGBoost native format)
+│   └── artifacts/
+│       └── model.json  # Trained model (XGBoost native format)
 ├── data/
-│   ├── fetch_data.py   # Data collection
 │   └── features.py     # Feature engineering
 ├── utils/
 │   ├── odds.py         # Odds API integration
 │   └── kelly.py        # Kelly Criterion calculator
+├── tests/              # pytest suite
 └── requirements.txt
 ```
 
@@ -129,12 +137,12 @@ These figures are best understood as a public demo of workflow and evaluation, n
 ## Model Details
 
 - **Algorithm**: XGBoost Classifier
-- **Training Data**: Demo/synthetic NBA games with team strength variation
+- **Training Data**: Demo/synthetic NBA games with team strength variation (`model/train.py`)
 - **Features**: Win percentage, PPG, opponent PPG, point differential, home advantage
-- **Evaluation Method**: Train/test split and cross-validation style workflow
+- **Evaluation Method**: Walk-forward CV and chronological holdout (see `model/train.py`)
 - **Target**: Binary classification (home win vs away win)
 
-For production-style use, connect real historical stats and a more rigorous evaluation pipeline.
+For production-style use, connect real historical stats and a more rigorous evaluation pipeline. There is currently no `nba_api` fetch module in this repository.
 
 ## Related Repos
 
@@ -143,8 +151,8 @@ For production-style use, connect real historical stats and a more rigorous eval
 
 ## Data Sources
 
-- **Historical Data**: NBA API (`nba_api`)
-- **Live Odds**: [The Odds API](https://the-odds-api.com/)
+- **Training data**: Synthetic sample games generated in `model/train.py`
+- **Live Odds**: [The Odds API](https://the-odds-api.com/) (optional; demo odds if `ODDS_API_KEY` is unset)
 
 ## Troubleshooting
 
