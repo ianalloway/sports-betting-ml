@@ -10,6 +10,7 @@ from .odds import (
     get_nba_odds,
     parse_odds,
     get_best_odds,
+    get_best_h2h_odds_for_game,
     get_demo_odds
 )
 
@@ -23,5 +24,6 @@ __all__ = [
     "get_nba_odds",
     "parse_odds",
     "get_best_odds",
+    "get_best_h2h_odds_for_game",
     "get_demo_odds"
 ]
