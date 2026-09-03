@@ -15,7 +15,7 @@ from utils.kelly import (
     find_value_bets,
     kelly_criterion,
 )
-from utils.odds import get_best_odds, parse_odds
+from utils.odds import get_best_h2h_odds_for_game, get_best_odds, parse_odds
 
 
 def test_american_odds_conversion_positive_negative_and_zero():
@@ -126,3 +126,46 @@ def test_get_best_odds_selects_best_available_price_per_team():
             "away_odds": {"odds": 125, "book": "Book B"},
         }
     ]
+
+
+def test_get_best_h2h_odds_for_game_does_not_override_real_negative_lines():
+    game = {
+        "home_team": "Home",
+        "away_team": "Away",
+        "bookmakers": [
+            {
+                "name": "Book A",
+                "markets": {
+                    "h2h": {
+                        "Home": {"price": -220},
+                        "Away": {"price": 180},
+                    }
+                },
+            }
+        ],
+    }
+
+    home_odds, away_odds = get_best_h2h_odds_for_game(game)
+    assert home_odds == -220
+    assert away_odds == 180
+
+
+def test_get_best_h2h_odds_for_game_uses_defaults_only_when_team_price_missing():
+    game = {
+        "home_team": "Home",
+        "away_team": "Away",
+        "bookmakers": [
+            {
+                "name": "Book A",
+                "markets": {
+                    "h2h": {
+                        "Home": {"price": -140},
+                    }
+                },
+            }
+        ],
+    }
+
+    home_odds, away_odds = get_best_h2h_odds_for_game(game)
+    assert home_odds == -140
+    assert away_odds == 130

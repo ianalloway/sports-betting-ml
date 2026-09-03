@@ -106,9 +106,9 @@ sports-betting-ml/
 ├── model/
 │   ├── train.py        # Model training script
 │   ├── predict.py      # Prediction functions
-│   └── model.json      # Trained model (XGBoost native format)
+│   └── artifacts/
+│       └── model.json  # Trained model (XGBoost native format)
 ├── data/
-│   ├── fetch_data.py   # Data collection
 │   └── features.py     # Feature engineering
 ├── utils/
 │   ├── odds.py         # Odds API integration

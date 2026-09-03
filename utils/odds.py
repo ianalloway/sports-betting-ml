@@ -140,6 +140,40 @@ def get_best_odds(games: list) -> list:
     return best_odds
 
 
+def get_best_h2h_odds_for_game(
+    game: dict,
+    default_home_odds: int = -150,
+    default_away_odds: int = 130
+) -> tuple[int, int]:
+    """Return best available moneyline odds for a single parsed game.
+
+    Defaults are used only when odds are missing for a team.
+    """
+    home_team = game.get("home_team")
+    away_team = game.get("away_team")
+    best_home = None
+    best_away = None
+
+    for book in game.get("bookmakers", []):
+        h2h = book.get("markets", {}).get("h2h", {})
+
+        home_odds = h2h.get(home_team, {}).get("price")
+        away_odds = h2h.get(away_team, {}).get("price")
+
+        if isinstance(home_odds, (int, float)):
+            if best_home is None or home_odds > best_home:
+                best_home = home_odds
+
+        if isinstance(away_odds, (int, float)):
+            if best_away is None or away_odds > best_away:
+                best_away = away_odds
+
+    return (
+        int(best_home) if best_home is not None else default_home_odds,
+        int(best_away) if best_away is not None else default_away_odds
+    )
+
+
 def get_demo_odds() -> list:
     """Return demo odds data when API key is not available."""
     return [
