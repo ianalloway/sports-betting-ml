@@ -1,1 +1,90 @@
-IyBTcG9ydHMgQmV0dGluZyBNTAoKTkJBIGdhbWUgcHJlZGljdGlvbiBhbmQgdmFsdWUtYmV0IGRldGVjdGlvbiB1c2luZyBYR0Jvb3N0ICsgS2VsbHkgQ3JpdGVyaW9uLiBTdHJlYW1saXQgZGFzaGJvYXJkIGZvciBpbnRlcmFjdGl2ZSBwcmVkaWN0aW9ucy4KCiMjIFdoYXQgVGhpcyBSZXBvIERvZXMKCi0gUHJlZGljdCBOQkEgZ2FtZSB3aW5uZXJzIHdpdGggfjY4JSBhY2N1cmFjeSAoWEdCb29zdCBjbGFzc2lmaWVyKQotIElkZW50aWZ5ICtFViBiZXRzIGJ5IGNvbXBhcmluZyBtb2RlbCBwcm9iYWJpbGl0aWVzIHRvIG1hcmtldC1pbXBsaWVkIG9kZHMKLSBTaXplIGJldHMgdXNpbmcgS2VsbHkgQ3JpdGVyaW9uICgrNS4yJSBiYWNrdGVzdGVkIFJPSSwgMS4zIFNoYXJwZSkKLSBTZXJ2ZSB2aWEgU3RyZWFtbGl0IGRhc2hib2FyZCAobGl2ZSBkZW1vIG9uIEh1Z2dpbmcgRmFjZSkKCiMjIEFyY2hpdGVjdHVyZQoKYGBgdGV4dAphcHAucHkgICAgICAgICAgICAgICMgU3RyZWFtbGl0IGRhc2hib2FyZCAodGhlIFVJKQptb2RlbC8KICB0cmFpbi5weSAgICAgICAgICAjIFRyYWluaW5nIHNjcmlwdAogIHByZWRpY3QucHkgICAgICAgICMgUHJlZGljdGlvbiArIGNvbmZpZGVuY2UKICBtb2RlbC5qc29uICAgICAgICAgIyBTYXZlZCBYR0Jvb3N0IG1vZGVsIChuYXRpdmUgZm9ybWF0KQpkYXRhLwogIGZldGNoX2RhdGEucHkgICAgICMgRGF0YSBjb2xsZWN0aW9uIGZyb20gTkJBIEFQSQogIGZlYXR1cmVzLnB5ICAgICAgICMgRmVhdHVyZSBlbmdpbmVlcmluZwp1dGlscy8KICBvZGRzLnB5ICAgICAgICAgICAjIFRoZSBPZGRzIEFQSSBpbnRlZ3JhdGlvbiArIHBhcnNpbmcKICBrZWxseS5weSAgICAgICAgICAjIEtlbGx5IENyaXRlcmlvbiBjYWxjdWxhdG9yCnJlcXVpcmVtZW50cy50eHQgICAgIyBQeXRob24gZGVwcwpEb2NrZXJmaWxlICAgICAgICAgICMgQ29udGFpbmVyIGJ1aWxkCmRvY2tlci1jb21wb3NlLnltbCAgIyBNdWx0aS1jb250YWluZXIgKGFwcCArIGRlcHMpCmVudi5leGFtcGxlICAgICAgICAgIyBUZW1wbGF0ZSBmb3IgLmVudiAoT0REU19BUElfS0VZKQpkZW1vLmdpZiAgICAgICAgICAgICMgQXBwIGRlbW8gcmVjb3JkaW5nCmRvY3MvICAgICAgICAgICAgICAgIyBEb2N1bWVudGF0aW9uIChhcmNoaXRlY3R1cmUuc3ZnLCBldGMuKQpgYGAKCiMjIEtleSBDb252ZW50aW9ucwoKLSBQeXRob24gMy4xMissIHBpcC1iYXNlZCBkZXBzIChzZWUgcmVxdWlyZW1lbnRzLnR4dCkKLSAqKk5CQS1mb2N1c2VkIGRvbWFpbioqIOKAlCBub3QgbXVsdGktc3BvcnQuIERvbid0IGFkZCBORkwvTUxCL05ITCB3aXRob3V0IGEgZGF0YSBzb3VyY2UuCi0gVXNlcyBUaGUgT2RkcyBBUEkgZm9yIGxpdmUgb2RkcyAob3B0aW9uYWwg4oCUIGFwcCB3b3JrcyB3aXRoIGRlbW8gZGF0YSB3aXRob3V0IGEga2V5KQotIERvY2tlciBhdmFpbGFibGUgZm9yIGRlcGxveW1lbnQKLSBSZWxhdGVkIHJlcG9zOiBbbmJhLXJhdGluZ3NdKGh0dHBzOi8vZ2l0aHViLmNvbS9pYW5hbGxvd2F5L25iYS1yYXRpbmdzKSAoRWxvL2tlbGx5IHByaW1pdGl2ZXMpLCBbbmJhLWNsdi1kYXNoYm9hcmRdKGh0dHBzOi8vZ2l0aHViLmNvbS9pYW5hbGxvd2F5L25iYS1jbHYtZGFzaGJvYXJkKSAoZXZhbHVhdGlvbiBVSSkKCiMjIENvbW1hbmRzCgpgYGBiYXNoCiMgTG9jYWwgZGV2CnBpcCBpbnN0YWxsIC1yIHJlcXVpcmVtZW50cy50eHQKY3AgZW52LmV4YW1wbGUgLmVudiAgICMgQWRkIE9ERFNfQVBJX0tFWSBpZiB5b3Ugd2FudCBsaXZlIG9kZHMKc3RyZWFtbGl0IHJ1biBhcHAucHkgICAgICMgT3BlbnMgYXQgaHR0cDovL2xvY2FsaG9zdDo4NTAxCgojIERvY2tlcgpkb2NrZXIgYnVpbGQgLXQgc3BvcnRzLWJldHRpbmctbWwgLgpkb2NrZXIgcnVuIC1wIDc4NjA6Nzg2MCAtLWVudi1maWxlIC5lbnYgc3BvcnRzLWJldHRpbmctbWwKYGBgCgojIyBIb3cgSXQgV29ya3MKCjEuIERhdGE6IGhpc3RvcmljYWwgTkJBIGdhbWUgZGF0YSAodGVhbSBzdGF0cywgaG9tZS9hd2F5LCByZWNlbnQgZm9ybSkgdmlhIGBuYmFfYXBpYAoyLiBNb2RlbDogWEdCb29zdCBjbGFzc2lmaWVyIHRyYWluZWQgb24gd2luLXByb2JhYmlsaXR5IGZlYXR1cmVzCjMuIFByZWRpY3Rpb246IG91dHB1dHMgd2luIHByb2JhYmlsaXR5IHBlciB0ZWFtCjQuIFZhbHVlIGRldGVjdGlvbjogY29udmVydHMgYmV0dGluZyBvZGRzIHRvIGltcGxpZWQgcHJvYmFiaWxpdHksIGNvbXBhcmVzIHRvIG1vZGVsIHByb2JhYmlsaXR5CjUuIEJldCBzaXppbmc6IEtlbGx5IENyaXRlcmlvbiBjb21wdXRlcyBvcHRpbWFsIGJldCBzaXplIGZyb20gZWRnZQoKIyMgUGVyZm9ybWFuY2UgKGRlbW8vc3ludGhldGljIGRhdGEpCgp8IE1ldHJpYyB8IFZhbHVlIHwKfC0tLS0tLS0tfC0tLS0tLS18CnwgQWNjdXJhY3kgfCB+NjglIHwKfCBST0kgKGJhY2t0ZXN0ZWQpIHwgKzUuMiUgfAp8IFNoYXJwZSBSYXRpbyB8IDEuMyB8CgpUaGVzZSBmaWd1cmVzIGFyZSBmcm9tIGEgZGVtby9zeW50aGV0aWMgZGF0YXNldCDigJQgdHJlYXQgYXMgYSB3b3JrZmxvdyBkZW1vLCBub3QgcHJvZHVjdGlvbiByZXR1cm5zLgoKIyMgVHJvdWJsZXNob290aW5nCgotICoqIk5vIGdhbWVzIGF2YWlsYWJsZS4gU2hvd2luZyBkZW1vIGRhdGEuIioqIOKAlCBPZGRzIEFQSSB1bmF2YWlsYWJsZS9yYXRlLWxpbWl0ZWQsIGludmFsaWQvbWlzc2luZyBrZXksIG9yIG5vIE5CQSBnYW1lcyB0b2RheQotICoqSW1wb3J0IGVycm9ycyoqIOKAlCByZWluc3RhbGwgaW4gYSBjbGVhbiB2ZW52OiBgcHl0aG9uIC1tIHZlbnYgdmVudiAmJiBzb3VyY2UgdmVudi9iaW4vYWN0aXZhdGUgJiYgcGlwIGluc3RhbGwgLXIgcmVxdWlyZW1lbnRzLnR4dGAKLSAqKkRhc2hib2FyZCBzbG93IG9uIGZpcnN0IHJ1bioqIOKAlCBtb2RlbCB0cmFpbmluZyArIG9kZHMgZmV0Y2ggY2FuIHRha2Ugc2V2ZXJhbCBzZWNvbmRzCgojIyBPd25lcgoKSWFuIEFsbG93YXkgKEBpYW5hbGxvd2F5KSDigJQgRGF0YSBTY2llbnRpc3QsIHNwb3J0cyBhbmFseXRpY3MvTUwuCg==
+# Sports Betting ML
+
+NBA game prediction and value-bet detection using XGBoost + Kelly Criterion. Streamlit dashboard for interactive predictions.
+
+## What This Repo Does
+
+- Predict NBA game winners with an XGBoost classifier trained on synthetic sample games
+- Identify +EV bets by comparing model probabilities to market-implied odds
+- Size bets using Kelly Criterion
+- Serve via Streamlit dashboard (live demo on Hugging Face)
+
+Demo/synthetic evaluation figures live in the README. Treat them as a workflow demo, not production returns.
+
+## Architecture
+
+```text
+app.py                # Streamlit dashboard (the UI)
+model/
+  train.py            # Training script (synthetic sample data)
+  predict.py          # Prediction + confidence
+  artifacts/
+    model.json        # Saved XGBoost model (native format; not committed)
+data/
+  features.py         # Feature engineering (shared train/serve)
+utils/
+  odds.py             # The Odds API integration + parsing
+  kelly.py            # Kelly Criterion calculator
+tests/                # pytest suite
+pytest.ini            # pythonpath = . for imports
+requirements.txt      # Python deps
+Dockerfile            # Container build
+docker-compose.yml    # Multi-container (app + deps)
+env.example           # Template for .env (ODDS_API_KEY, optional MODEL_PATH)
+demo.gif              # App demo recording
+docs/                 # Documentation (architecture.svg, etc.)
+```
+
+## Key Conventions
+
+- Python 3.12+, pip-based deps (see requirements.txt)
+- **NBA-focused domain** — not multi-sport. Don't add NFL/MLB/NHL without a data source.
+- Uses The Odds API for live odds (optional — app works with demo data without a key)
+- Docker available for deployment
+- Related repos: [nba-ratings](https://github.com/ianalloway/nba-ratings) (Elo/kelly primitives), [nba-clv-dashboard](https://github.com/ianalloway/nba-clv-dashboard) (evaluation UI)
+
+## Commands
+
+```bash
+# Local dev
+pip install -r requirements.txt
+cp env.example .env   # Add ODDS_API_KEY if you want live odds
+streamlit run app.py      # Opens at http://localhost:8501
+
+# Tests / lint (same as CI)
+pip install pytest ruff
+python -m pytest tests/ -v
+ruff check . --select E,F,W --ignore E501
+
+# Docker
+docker build -t sports-betting-ml .
+docker run -p 7860:7860 --env-file .env sports-betting-ml
+```
+
+## How It Works
+
+1. Data: synthetic NBA game rows (team stats, home/away, recent form) from `model.train.create_sample_data`
+2. Model: XGBoost classifier trained on win-probability features
+3. Prediction: outputs win probability per team
+4. Value detection: converts betting odds to implied probability, compares to model probability
+5. Bet sizing: Kelly Criterion computes optimal bet size from edge
+
+## Performance (demo/synthetic data)
+
+| Metric | Value |
+|--------|-------|
+| Accuracy | ~68% |
+| ROI (backtested) | +5.2% |
+| Sharpe Ratio | 1.3 |
+
+These figures are from a demo/synthetic dataset — treat as a workflow demo, not production returns.
+
+## Troubleshooting
+
+- **"No games available. Showing demo data."** — Odds API unavailable/rate-limited, invalid/missing key, or no NBA games today
+- **Import errors** — reinstall in a clean venv: `python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
+- **Dashboard slow on first run** — model training + odds fetch can take several seconds
+
+## Owner
+
+Ian Alloway (@ianalloway) — Data Scientist, sports analytics/ML.
