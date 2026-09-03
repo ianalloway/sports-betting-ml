@@ -180,7 +180,7 @@ def get_best_h2h_odds_for_game(
 
         home_odds = _american_price(h2h.get(home_team))
         away_odds = _american_price(h2h.get(away_team))
- mar
+
         if home_odds is not None and (best_home is None or home_odds > best_home):
             best_home = home_odds
 
