@@ -14,7 +14,7 @@ from utils.kelly import (
     kelly_criterion,
     calculate_edge
 )
-from utils.odds import get_nba_odds, parse_odds
+from utils.odds import get_nba_odds, parse_odds, get_best_h2h_odds_for_game
 from model.predict import predict_game, get_default_stats, predict_with_confidence
 
 # Caching API calls and Model Loading
@@ -149,20 +149,9 @@ with tab1:
             # Predict with error handling
             home_prob, away_prob = predict_game(home_stats, away_stats, model=cached_model)
 
-            # Get best odds
-            best_home_odds = -150
-            best_away_odds = 130
-
-            for book in game.get('bookmakers', []):
-                h2h = book.get('markets', {}).get('h2h', {})
-                if home_team in h2h:
-                    odds = h2h[home_team].get('price', -150)
-                    if odds > best_home_odds:
-                        best_home_odds = odds
-                if away_team in h2h:
-                    odds = h2h[away_team].get('price', 130)
-                    if odds > best_away_odds:
-                        best_away_odds = odds
+            # Get best odds (fallback defaults are only used when a team
+            # has no available price in the parsed bookmaker data).
+            best_home_odds, best_away_odds = get_best_h2h_odds_for_game(game)
 
             # Calculate edge
             home_implied = american_to_implied_prob(best_home_odds)
@@ -231,20 +220,9 @@ with tab2:
 
             home_prob, away_prob = predict_game(home_stats, away_stats, model=cached_model)
 
-            # Get best odds
-            best_home_odds = -150
-            best_away_odds = 130
-
-            for book in game.get('bookmakers', []):
-                h2h = book.get('markets', {}).get('h2h', {})
-                if home_team in h2h:
-                    odds = h2h[home_team].get('price', -150)
-                    if odds > best_home_odds:
-                        best_home_odds = odds
-                if away_team in h2h:
-                    odds = h2h[away_team].get('price', 130)
-                    if odds > best_away_odds:
-                        best_away_odds = odds
+            # Get best odds (fallback defaults are only used when a team
+            # has no available price in the parsed bookmaker data).
+            best_home_odds, best_away_odds = get_best_h2h_odds_for_game(game)
 
             # Check home team
             home_implied = american_to_implied_prob(best_home_odds)
@@ -352,6 +330,8 @@ with tab3:
     with col3:
         st.metric("Sharpe Ratio", "1.3")
 
+    st.caption("These figures come from the demo/synthetic training workflow, not live betting results.")
+
     st.markdown("""
     #### Value Betting Strategy
 
@@ -393,6 +373,8 @@ with tab3:
                  title='Feature Importance in Prediction Model')
     fig.update_layout(yaxis={'categoryorder': 'total ascending'})
     st.plotly_chart(fig, use_container_width=True)
+
+    st.caption("Chart values are illustrative placeholders for the demo UI, not loaded from a trained artifact.")
 
 # Footer
 st.markdown("---")
