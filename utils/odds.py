@@ -98,6 +98,16 @@ def parse_odds(games: list) -> list:
     return parsed
 
 
+def _american_price(outcome) -> Optional[float]:
+    """Extract a numeric American price from a parsed h2h outcome."""
+    if not isinstance(outcome, dict):
+        return None
+    price = outcome.get("price")
+    if isinstance(price, bool) or not isinstance(price, (int, float)):
+        return None
+    return price
+
+
 def get_best_odds(games: list) -> list:
     """
     Get the best available odds for each team across all bookmakers.
@@ -114,19 +124,23 @@ def get_best_odds(games: list) -> list:
         home_team = game["home_team"]
         away_team = game["away_team"]
 
-        best_home = {"odds": -10000, "book": None}
-        best_away = {"odds": -10000, "book": None}
+        best_home = {"odds": None, "book": None}
+        best_away = {"odds": None, "book": None}
 
         for book in game.get("bookmakers", []):
             h2h = book.get("markets", {}).get("h2h", {})
 
-            home_odds = h2h.get(home_team, {}).get("price")
-            away_odds = h2h.get(away_team, {}).get("price")
+            home_odds = _american_price(h2h.get(home_team))
+            away_odds = _american_price(h2h.get(away_team))
 
-            if home_odds and home_odds > best_home["odds"]:
+            if home_odds is not None and (
+                best_home["odds"] is None or home_odds > best_home["odds"]
+            ):
                 best_home = {"odds": home_odds, "book": book["name"]}
 
-            if away_odds and away_odds > best_away["odds"]:
+            if away_odds is not None and (
+                best_away["odds"] is None or away_odds > best_away["odds"]
+            ):
                 best_away = {"odds": away_odds, "book": book["name"]}
 
         best_odds.append({
@@ -138,6 +152,45 @@ def get_best_odds(games: list) -> list:
         })
 
     return best_odds
+
+
+def get_best_h2h_odds_for_game(
+    game: dict,
+    default_home_odds: int = -150,
+    default_away_odds: int = 130
+) -> tuple[int, int]:
+    """Return best available moneyline odds for a single parsed game.
+
+    Defaults are used only when odds are missing for a team. Seed values
+    must not compete with real lines (a -220 favorite is worse than a
+    -150 seed if you compare with ``>``).
+    """
+    home_team = game.get("home_team")
+    away_team = game.get("away_team")
+    best_home = None
+    best_away = None
+
+    for book in game.get("bookmakers", []):
+        markets = book.get("markets") or {}
+        if not isinstance(markets, dict):
+            continue
+        h2h = markets.get("h2h") or {}
+        if not isinstance(h2h, dict):
+            continue
+
+        home_odds = _american_price(h2h.get(home_team))
+        away_odds = _american_price(h2h.get(away_team))
+ mar
+        if home_odds is not None and (best_home is None or home_odds > best_home):
+            best_home = home_odds
+
+        if away_odds is not None and (best_away is None or away_odds > best_away):
+            best_away = away_odds
+
+    return (
+        int(best_home) if best_home is not None else default_home_odds,
+        int(best_away) if best_away is not None else default_away_odds
+    )
 
 
 def get_demo_odds() -> list:
