@@ -1,11 +1,6 @@
 """Regression tests for issue #28: leakage and train/serve skew."""
 
-import sys
-from pathlib import Path
-
 import pandas as pd
-
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from data.features import get_default_stats, prepare_training_data
 from model.predict import create_features

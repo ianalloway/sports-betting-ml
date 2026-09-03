@@ -6,11 +6,6 @@ makes that work: one resolved artifact path shared by training and
 serving, overridable with MODEL_PATH.
 """
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from model import DEFAULT_ARTIFACT_PATH, model_artifact_path
 
 
