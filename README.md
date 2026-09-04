@@ -25,11 +25,13 @@ license: mit
 
 ![Demo](demo.gif)
 
-Applied sports ML project for predicting NBA game outcomes and identifying value bets by comparing model probabilities to market odds.
+Applied sports ML **training demo** for predicting NBA game outcomes and identifying value bets by comparing model probabilities to market odds.
+
+**Stack layering:** [nba-ratings](https://github.com/ianalloway/nba-ratings) (Python) → [kelly-js](https://github.com/ianalloway/kelly-js) (TS) → **sports-betting-ml** (this training demo) → [ai-advantage](https://github.com/ianalloway/ai-advantage) (product).
 
 ## Why This Repo Matters
 
-This is the modeling side of the sports analytics story:
+This is the modeling / demo side of the sports analytics story:
 
 - supervised ML for game prediction
 - value-bet detection from model edge vs implied odds
@@ -124,15 +126,15 @@ sports-betting-ml/
 └── requirements.txt
 ```
 
-## Model Performance
+## Model Performance (synthetic demo)
 
-| Metric | Value |
-|--------|-------|
-| Accuracy | ~68% |
-| ROI (backtested) | +5.2% |
-| Sharpe Ratio | 1.3 |
+> **These numbers are from a synthetic / demo training run** generated in `model/train.py`. They illustrate the evaluation workflow only — not live market performance or a claim of production ROI.
 
-These figures are best understood as a public demo of workflow and evaluation, not as a promise of production returns.
+| Metric | Demo value |
+|--------|------------|
+| Accuracy | ~68% (synthetic holdout) |
+| ROI (backtested) | +5.2% (synthetic) |
+| Sharpe Ratio | 1.3 (synthetic) |
 
 ## Model Details
 
@@ -146,8 +148,11 @@ For production-style use, connect real historical stats and a more rigorous eval
 
 ## Related Repos
 
-- [`nba-ratings`](https://github.com/ianalloway/nba-ratings): reusable Elo / win probability / Kelly primitives
-- [`nba-clv-dashboard`](https://github.com/ianalloway/nba-clv-dashboard): evaluation UI for calibration, rolling accuracy, and CLV-style reporting
+- [`nba-ratings`](https://github.com/ianalloway/nba-ratings): reusable Elo / win probability / Kelly primitives (PyPI: `nba-edge`)
+- [`kelly-js`](https://github.com/ianalloway/kelly-js): TypeScript Kelly / odds / bankroll math
+- [`ai-advantage`](https://github.com/ianalloway/ai-advantage): live product layer at [aiadvantagesports.com](https://aiadvantagesports.com)
+
+Archived evaluation UI (read-only): [`nba-clv-dashboard`](https://github.com/ianalloway/nba-clv-dashboard) — prefer the living stack above for new work.
 
 ## Data Sources
 
