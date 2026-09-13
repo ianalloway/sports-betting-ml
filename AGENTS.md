@@ -71,13 +71,14 @@ docker run -p 7860:7860 --env-file .env sports-betting-ml
 
 ## Performance (demo/synthetic data)
 
-| Metric | Value |
-|--------|-------|
-| Accuracy | ~68% |
-| ROI (backtested) | +5.2% |
-| Sharpe Ratio | 1.3 |
+| Metric | Typical value |
+|--------|---------------|
+| Walk-forward CV accuracy | ~0.58 |
+| Chronological holdout accuracy | ~0.61 |
+| Holdout log loss | ~0.67 |
+| Holdout Brier score | ~0.24 |
 
-These figures are from a demo/synthetic dataset — treat as a workflow demo, not production returns.
+These figures come from `python -m model.train` on the synthetic generator — workflow demo only, not production returns. ROI/Sharpe are **not** computed by the training script.
 
 ## Troubleshooting
 

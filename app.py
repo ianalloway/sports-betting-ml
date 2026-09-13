@@ -324,13 +324,16 @@ with tab3:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Accuracy", "~68%")
+        st.metric("Holdout accuracy", "~61%")
     with col2:
-        st.metric("Backtested ROI", "+5.2%")
+        st.metric("CV accuracy", "~58%")
     with col3:
-        st.metric("Sharpe Ratio", "1.3")
+        st.metric("Holdout Brier", "~0.24")
 
-    st.caption("These figures come from the demo/synthetic training workflow, not live betting results.")
+    st.caption(
+        "Synthetic demo metrics from `python -m model.train` (walk-forward CV + chronological holdout). "
+        "Not live betting results — the training script does not compute ROI or Sharpe."
+    )
 
     st.markdown("""
     #### Value Betting Strategy
