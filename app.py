@@ -14,8 +14,15 @@ from utils.kelly import (
     kelly_criterion,
     calculate_edge
 )
+from utils.clv import (
+    attach_synthetic_closes,
+    clv_chart_records,
+    filter_bets_beating_close,
+    simulate_synthetic_clv_bets,
+    summarize_clv,
+)
 from utils.odds import get_nba_odds, parse_odds, get_best_h2h_odds_for_game
-from model.predict import predict_game, get_default_stats, predict_with_confidence
+from model.predict import predict_game, get_default_stats, predict_with_confidence, load_model
 
 # Caching API calls and Model Loading
 @st.cache_data(ttl=300)
@@ -24,7 +31,6 @@ def cached_get_nba_odds():
 
 @st.cache_resource
 def get_cached_model():
-    from model.predict import load_model
     return load_model()
 
 # Load Model once for the page
@@ -69,6 +75,14 @@ st.sidebar.header("Settings")
 min_edge = st.sidebar.slider("Minimum Edge (%)", 0.0, 10.0, 3.0, 0.5)
 kelly_fraction = st.sidebar.slider("Kelly Fraction", 0.1, 1.0, 0.25, 0.05)
 bankroll = st.sidebar.number_input("Bankroll ($)", min_value=100, value=1000, step=100)
+require_beat_close = st.sidebar.checkbox(
+    "Value bets: require beat-close",
+    value=False,
+    help=(
+        "When enabled, value bets are filtered using simulated closing lines "
+        "(not live sportsbook closes). See the CLV Backtest tab."
+    ),
+)
 
 if st.sidebar.button("Refresh Odds"):
     cached_get_nba_odds.clear()
@@ -85,6 +99,7 @@ predictions to betting odds to find value bets.
 2. Compares to implied odds probability
 3. Finds bets where model > odds (positive edge)
 4. Uses Kelly Criterion for bet sizing
+5. CLV backtest compares open vs close (synthetic closes in this demo)
 """)
 
 # Demo team stats (fallback when no real data available)
@@ -113,7 +128,9 @@ DEMO_TEAM_STATS = {
 }
 
 # Main content
-tab1, tab2, tab3 = st.tabs(["📊 Today's Games", "🎯 Value Bets", "📈 Model Info"])
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["📊 Today's Games", "🎯 Value Bets", "📉 CLV Backtest", "📈 Model Info"]
+)
 
 with tab1:
     st.header("Today's NBA Games")
@@ -268,6 +285,17 @@ with tab2:
         # Sort by edge
         value_bets.sort(key=lambda x: x['edge'], reverse=True)
 
+        if require_beat_close:
+            value_bets = filter_bets_beating_close(
+                attach_synthetic_closes(value_bets, seed=7),
+                require_beat_close=True,
+            )
+            st.caption(
+                "Beat-close filter uses **simulated** closing lines attached to "
+                "today's opens — not historical sportsbook closes."
+            )
+
+    if value_bets:
         # Summary metrics
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -300,11 +328,110 @@ with tab2:
                 with col4:
                     st.metric("Suggested Bet", f"${bet['bet_amount']:.2f}")
 
+                if "clv_pts" in bet:
+                    st.caption(
+                        f"Synthetic close {bet['close_odds']:+d} · "
+                        f"CLV {bet['clv_pts']:+.2f} pts · beat close"
+                    )
+
                 st.markdown("---")
     else:
-        st.info(f"No value bets found with edge >= {min_edge}%. Try lowering the minimum edge threshold.")
+        if require_beat_close:
+            st.info(
+                f"No value bets with edge >= {min_edge}% that also beat a "
+                "simulated close. Try lowering the edge threshold or disabling "
+                "the beat-close filter."
+            )
+        else:
+            st.info(f"No value bets found with edge >= {min_edge}%. Try lowering the minimum edge threshold.")
 
 with tab3:
+    st.header("📉 CLV Backtest")
+    st.markdown(
+        "Closing Line Value compares the **open** price you bet to the market's "
+        "**closing** line. Positive CLV (probability points) means you beat the close."
+    )
+    st.info(
+        "This demo uses **synthetic** open/close American odds — not scraped "
+        "historical sportsbook closes. Treat metrics as a workflow illustration."
+    )
+
+    n_clv_bets = st.slider("Synthetic bets in slice", 10, 100, 40, 5)
+    value_only = st.checkbox("Only include synthetic value bets", value=False)
+    beat_close_only = st.checkbox("Only bets that beat the close", value=False)
+
+    clv_bets = simulate_synthetic_clv_bets(n_bets=n_clv_bets, seed=42)
+    if value_only:
+        clv_bets = [b for b in clv_bets if b.get("is_value_bet")]
+    if beat_close_only:
+        clv_bets = filter_bets_beating_close(clv_bets, require_beat_close=True)
+
+    clv_summary = summarize_clv(clv_bets)
+
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.metric("Bets in slice", clv_summary["n_bets"])
+    with m2:
+        st.metric("Mean CLV", f"{clv_summary['mean_clv_pts']:+.2f} pts")
+    with m3:
+        st.metric("Beat-close rate", f"{clv_summary['beat_close_rate']:.1%}")
+    with m4:
+        st.metric("Beat close (count)", clv_summary["n_beat_close"])
+
+    st.caption(
+        f"Odds source: `{clv_summary['source'] or 'n/a'}` · "
+        "CLV pts = (close implied − open implied) × 100."
+    )
+
+    if clv_bets:
+        chart_df = pd.DataFrame(clv_chart_records(clv_bets))
+        fig_clv = px.line(
+            chart_df,
+            x="bet_index",
+            y=["clv_pts", "cumulative_mean_clv"],
+            title="CLV over bets (synthetic)",
+            labels={"value": "CLV (pts)", "bet_index": "Bet #", "variable": "Series"},
+        )
+        fig_clv.update_layout(legend_title_text="")
+        st.plotly_chart(fig_clv, use_container_width=True)
+
+        table_df = pd.DataFrame(clv_bets)[
+            [
+                "bet_id",
+                "team",
+                "opponent",
+                "location",
+                "open_odds",
+                "close_odds",
+                "clv_pts",
+                "beat_close",
+                "is_value_bet",
+                "model_edge_pct",
+            ]
+        ].copy()
+        table_df = table_df.rename(
+            columns={
+                "bet_id": "Bet",
+                "team": "Team",
+                "opponent": "Opponent",
+                "location": "Loc",
+                "open_odds": "Open",
+                "close_odds": "Close",
+                "clv_pts": "CLV pts",
+                "beat_close": "Beat close",
+                "is_value_bet": "Value bet",
+                "model_edge_pct": "Edge %",
+            }
+        )
+        table_df["Open"] = table_df["Open"].map(lambda x: f"{int(x):+d}")
+        table_df["Close"] = table_df["Close"].map(lambda x: f"{int(x):+d}")
+        table_df["CLV pts"] = table_df["CLV pts"].map(lambda x: f"{x:+.2f}")
+        table_df["Edge %"] = table_df["Edge %"].map(lambda x: f"{x:+.1f}")
+        st.dataframe(table_df, use_container_width=True, hide_index=True)
+    else:
+        st.warning("No bets match the current CLV filters.")
+
+with tab4:
     st.header("📈 Model Information")
 
     st.markdown("""
@@ -360,6 +487,13 @@ with tab3:
     ```
 
     We use **fractional Kelly** (default 25%) for more conservative sizing.
+
+    #### Closing Line Value (CLV)
+
+    The **CLV Backtest** tab compares open vs close American odds on a synthetic
+    slice. Mean CLV and beat-close rate measure whether picks consistently got
+    a better price than the (simulated) close — a standard sports-betting
+    evaluation lens, separate from win/loss ROI.
     """)
 
     # Feature importance chart
