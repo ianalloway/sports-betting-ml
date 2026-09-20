@@ -21,6 +21,7 @@ sys.path.insert(0, str(MODEL_DIR.parent))
 
 from data.features import prepare_training_data  # noqa: E402
 from model import model_artifact_path  # noqa: E402
+from utils.clv import simulate_synthetic_clv_bets, summarize_clv  # noqa: E402
 
 
 def create_sample_data() -> pd.DataFrame:
@@ -172,6 +173,17 @@ def main():
     print(f"Holdout Brier score: {metrics['test_brier']:.3f}")
     print("\nClassification Report:")
     print(metrics['classification_report'])
+
+    # Synthetic CLV backtest slice (open vs close American odds).
+    # Closes are simulated — not historical sportsbook closing lines.
+    print("\nSynthetic CLV backtest (demo closes, not live market data)...")
+    clv_bets = simulate_synthetic_clv_bets(n_bets=40, seed=42)
+    clv_summary = summarize_clv(clv_bets)
+    print(
+        f"CLV bets: {clv_summary['n_bets']} | "
+        f"mean CLV: {clv_summary['mean_clv_pts']:+.2f} pts | "
+        f"beat-close rate: {clv_summary['beat_close_rate']:.1%}"
+    )
 
     # Train the final model on the full dataset
     print("Training final model on full dataset...")
