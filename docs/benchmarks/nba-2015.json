@@ -1,0 +1,230 @@
+{
+  "configuration": {
+    "holdout_start_inclusive": "2014-07-01",
+    "holdout_end_exclusive": "2015-07-01",
+    "rolling_window": 10,
+    "min_prior_games_per_team": 5,
+    "reset_each_season": true,
+    "same_date_results_excluded": true,
+    "holdout_protocol": "daily walk-forward; model frozen",
+    "features": [
+      "home_win_pct",
+      "away_win_pct",
+      "home_ppg",
+      "away_ppg",
+      "home_opp_ppg",
+      "away_opp_ppg",
+      "home_point_diff",
+      "away_point_diff",
+      "win_pct_diff",
+      "point_diff_diff",
+      "home_advantage"
+    ],
+    "model_parameters": {
+      "objective": "binary:logistic",
+      "colsample_bytree": 0.8,
+      "enable_categorical": true,
+      "eval_metric": "logloss",
+      "learning_rate": 0.1,
+      "max_depth": 4,
+      "n_estimators": 100,
+      "n_jobs": 1,
+      "random_state": 42,
+      "subsample": 0.8
+    }
+  },
+  "data_counts": {
+    "eligible_raw_games": 7133,
+    "feature_rows": 6654,
+    "warmup_excluded": 479,
+    "training_games": 5505,
+    "holdout_games": 1149,
+    "outside_split": 0,
+    "training_first_date": "2009-11-06",
+    "training_last_date": "2014-04-16",
+    "holdout_first_date": "2014-11-07",
+    "holdout_last_date": "2015-04-15"
+  },
+  "baseline_training_home_win_rate": 0.5929155313351498,
+  "xgboost": {
+    "n_games": 1149,
+    "accuracy": 0.639686684073107,
+    "log_loss": 0.6332902436356346,
+    "brier_score": 0.22156980761224476,
+    "mean_probability": 0.5941150154986519,
+    "home_win_rate": 0.5726718885987816,
+    "ece_10_equal_width_bins": 0.03908453937506446,
+    "reliability_bins": [
+      {
+        "lower": 0.0,
+        "upper": 0.1,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 24,
+        "mean_probability": 0.1602516770362854,
+        "home_win_rate": 0.125
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.3,
+        "count": 54,
+        "mean_probability": 0.25834100389922104,
+        "home_win_rate": 0.4074074074074074
+      },
+      {
+        "lower": 0.3,
+        "upper": 0.4,
+        "count": 115,
+        "mean_probability": 0.35577908106472184,
+        "home_win_rate": 0.3739130434782609
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 182,
+        "mean_probability": 0.4516159232173647,
+        "home_win_rate": 0.44505494505494503
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6,
+        "count": 206,
+        "mean_probability": 0.5494984240786543,
+        "home_win_rate": 0.5242718446601942
+      },
+      {
+        "lower": 0.6,
+        "upper": 0.7,
+        "count": 180,
+        "mean_probability": 0.6497378134065204,
+        "home_win_rate": 0.6166666666666667
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.8,
+        "count": 212,
+        "mean_probability": 0.7512433138096107,
+        "home_win_rate": 0.7122641509433962
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 133,
+        "mean_probability": 0.842395561978333,
+        "home_win_rate": 0.7443609022556391
+      },
+      {
+        "lower": 0.9,
+        "upper": 1.0,
+        "count": 43,
+        "mean_probability": 0.9367751617764317,
+        "home_win_rate": 0.9302325581395349
+      }
+    ]
+  },
+  "home_rate_baseline": {
+    "n_games": 1149,
+    "accuracy": 0.5726718885987816,
+    "log_loss": 0.6833920536654613,
+    "brier_score": 0.24512860167872402,
+    "mean_probability": 0.5929155313351498,
+    "home_win_rate": 0.5726718885987816,
+    "ece_10_equal_width_bins": 0.02024364273636825,
+    "reliability_bins": [
+      {
+        "lower": 0.0,
+        "upper": 0.1,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.3,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.3,
+        "upper": 0.4,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6,
+        "count": 1149,
+        "mean_probability": 0.5929155313351498,
+        "home_win_rate": 0.5726718885987816
+      },
+      {
+        "lower": 0.6,
+        "upper": 0.7,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.8,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      },
+      {
+        "lower": 0.9,
+        "upper": 1.0,
+        "count": 0,
+        "mean_probability": null,
+        "home_win_rate": null
+      }
+    ]
+  },
+  "source": {
+    "name": "FiveThirtyEight Historical NBA Elo (game results only)",
+    "url": "https://raw.githubusercontent.com/fivethirtyeight/data/6d880e939ad3d11d94c137c911681b3cf718fd74/nba-elo/nbaallelo.csv",
+    "revision": "6d880e939ad3d11d94c137c911681b3cf718fd74",
+    "sha256": "d46ed3540ee8d9eca31b3e94cc8c777e0be5156173d814ebf65b8195e8d616bc",
+    "bytes": 18173265,
+    "documentation": "https://github.com/fivethirtyeight/data/blob/6d880e939ad3d11d94c137c911681b3cf718fd74/nba-elo/README.md",
+    "upstream_game_information": "Basketball-Reference.com, via FiveThirtyEight",
+    "license": "CC BY 4.0 (FiveThirtyEight repository default for data)",
+    "selection": "NBA, regular season, home rows, ending-year seasons 2010\u20132015"
+  },
+  "environment": {
+    "python": "3.13.15",
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1"
+  }
+}

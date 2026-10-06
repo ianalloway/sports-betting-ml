@@ -43,7 +43,7 @@ This is the modeling / demo side of the sports analytics story:
 
 ## Features
 
-- **Game Outcome Prediction**: XGBoost model trained on historical NBA data
+- **Game Outcome Prediction**: XGBoost demo trained on synthetic NBA-style games; separate [historical holdout benchmark](docs/historical-benchmark.md)
 - **Value Bet Detection**: Compares model probabilities to implied odds to find +EV bets
 - **Kelly Criterion**: Optimal bet sizing based on edge and bankroll
 - **Live Odds Integration**: Pulls current odds from The Odds API (optional)
@@ -133,9 +133,11 @@ sports-betting-ml/
 ├── model/
 │   ├── train.py           # Synthetic data + training / evaluation
 │   ├── predict.py         # Prediction helpers
+│   ├── benchmark.py       # Reproducible historical holdout (separate artifact)
 │   └── artifacts/         # model.json (generated; not committed)
 ├── data/
-│   └── features.py        # Feature engineering
+│   ├── features.py        # Shared feature definitions
+│   └── historical.py      # Pinned, checksum-verified historical archive
 ├── utils/
 │   ├── odds.py            # Odds API integration
 │   └── kelly.py           # Kelly Criterion calculator
@@ -163,6 +165,29 @@ sports-betting-ml/
 
 Re-run `python -m model.train` to regenerate metrics for your machine; synthetic draws vary slightly by seed / environment.
 
+## Historical Holdout Benchmark
+
+Run a separate, reproducible benchmark on free archived NBA results:
+
+```bash
+python -m model.benchmark
+# Reuse a verified download offline:
+python -m model.benchmark --archive data/raw/nbaallelo.csv --output-dir benchmark-results
+```
+
+This downloads a pinned FiveThirtyEight archive (about 18 MB, no API key), verifies its SHA-256, trains on 2009–10 through 2013–14 regular seasons, and evaluates the 2014–15 regular season. Features use only earlier dates; the model and training home-win-rate baseline remain frozen during the holdout. Outputs include provenance, reliability bins, per-game predictions, and a separate model in `benchmark-results/`.
+
+| Metric (1,149 holdout games after warmup) | XGBoost | Training home-win-rate baseline |
+|---|---:|---:|
+| Accuracy ↑ | 0.6397 | 0.5727 |
+| Log loss ↓ | 0.6333 | 0.6834 |
+| Brier score ↓ | 0.2216 | 0.2451 |
+| Calibration error (10-bin ECE) ↓ | 0.0391 | 0.0202 |
+
+Measured local macOS/Python 3.13 results, not synthetic estimates; see the [saved report](docs/benchmarks/nba-2015.json) and [protocol, attribution, and limitations](docs/historical-benchmark.md). This is one old season without historical sportsbook odds, so it does not establish betting profitability or present-day performance. The baseline has lower ECE despite worse predictive scores. The Streamlit demo continues to use synthetic training and demo team statistics; this command does not replace its artifact.
+
+The [Linux/Python 3.12 CI report](docs/benchmarks/nba-2015-linux.json) scored 0.6353 accuracy, 0.6327 log loss, 0.2214 Brier, and 0.0422 ECE with the same source, configuration, and package versions. Training output varies across these environments; compare exact results within a recorded environment. Baseline results match exactly.
+
 ## Model Details
 
 - **Algorithm**: XGBoost Classifier
@@ -172,7 +197,7 @@ Re-run `python -m model.train` to regenerate metrics for your machine; synthetic
 - **Target**: Binary classification (home win vs away win)
 - **Artifact**: `model/artifacts/model.json` (XGBoost native format; created by training / CI, not checked in)
 
-For production-style use, connect real historical stats and a more rigorous evaluation pipeline. There is currently no `nba_api` fetch module in this repository.
+For the separate historical evaluation, see `model/benchmark.py`. Production use would still require current point-in-time data, broader evaluation, and integration with serving. There is no `nba_api` fetch module in this repository.
 
 ## Related Repos
 
@@ -184,7 +209,8 @@ Archived evaluation UI (read-only): [`nba-clv-dashboard`](https://github.com/ian
 
 ## Data Sources
 
-- **Training data**: Synthetic sample games generated in `model/train.py`
+- **Dashboard training data**: Synthetic sample games generated in `model/train.py`
+- **Historical benchmark**: FiveThirtyEight NBA archive, sourced from Basketball-Reference; pinned revision, SHA-256, license, and filtering are documented in [the benchmark protocol](docs/historical-benchmark.md)
 - **Live Odds**: [The Odds API](https://the-odds-api.com/) (optional; demo odds if `ODDS_API_KEY` is unset)
 
 ## Troubleshooting
