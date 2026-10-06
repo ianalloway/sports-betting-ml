@@ -54,7 +54,15 @@ The holdout year and protocol were chosen before running the first historical ev
 
 The observed holdout home-win rate is 0.572672. ECE is the count-weighted absolute difference between mean predicted probability and observed win rate in ten fixed equal-width bins. Bins are left-inclusive/right-exclusive except the final bin includes 1. Empty bins have null means and zero weight. Reliability-bin counts and means are included in the report; this is diagnostic evaluation, not a fitted calibrator.
 
-XGBoost improves accuracy and proper scoring rules against this simple baseline, but has higher ECE. A constant predictor can have low aggregate calibration error while offering little discrimination. ECE depends on binning and sample size; it is not evidence of reliable tail probabilities or safe Kelly staking. Some bins are small. Exact floating-point results can differ across library versions/platforms; each run records its environment.
+XGBoost improves accuracy and proper scoring rules against this simple baseline, but has higher ECE. A constant predictor can have low aggregate calibration error while offering little discrimination. ECE depends on binning and sample size; it is not evidence of reliable tail probabilities or safe Kelly staking. Some bins are small. Training output can differ across environments even with the same seed and package versions; each run records its environment.
+
+The [Linux x86_64/Python 3.12.14 CI run](benchmarks/nba-2015-linux.json), from [workflow 37477958346](https://github.com/ianalloway/sports-betting-ml/actions/runs/37477958346), used identical source bytes, features, counts, parameters, and package versions, but yielded these XGBoost metrics:
+
+| Accuracy | Log loss | Brier | 10-bin ECE |
+|---:|---:|---:|---:|
+| 0.6353 | 0.6327 | 0.2214 | 0.0422 |
+
+Its baseline results match the local report exactly. The difference corresponds to five fewer correct predictions on CI. This is a measured cross-environment training difference, not a second holdout or an independent replication across seasons. Neither model was tuned in response. Use the recorded environment for exact comparisons; the data-selection and temporal-split protocol is identical.
 
 ## Limits
 

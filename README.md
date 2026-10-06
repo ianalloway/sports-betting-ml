@@ -184,7 +184,9 @@ This downloads a pinned FiveThirtyEight archive (about 18 MB, no API key), verif
 | Brier score ↓ | 0.2216 | 0.2451 |
 | Calibration error (10-bin ECE) ↓ | 0.0391 | 0.0202 |
 
-Measured results, not synthetic estimates; see the [saved report](docs/benchmarks/nba-2015.json) and [protocol, attribution, and limitations](docs/historical-benchmark.md). This is one old season without historical sportsbook odds, so it does not establish betting profitability or present-day performance. The baseline has lower ECE despite worse predictive scores. The Streamlit demo continues to use synthetic training and demo team statistics; this command does not replace its artifact.
+Measured local macOS/Python 3.13 results, not synthetic estimates; see the [saved report](docs/benchmarks/nba-2015.json) and [protocol, attribution, and limitations](docs/historical-benchmark.md). This is one old season without historical sportsbook odds, so it does not establish betting profitability or present-day performance. The baseline has lower ECE despite worse predictive scores. The Streamlit demo continues to use synthetic training and demo team statistics; this command does not replace its artifact.
+
+The [Linux/Python 3.12 CI report](docs/benchmarks/nba-2015-linux.json) scored 0.6353 accuracy, 0.6327 log loss, 0.2214 Brier, and 0.0422 ECE with the same source, configuration, and package versions. Training output varies across these environments; compare exact results within a recorded environment. Baseline results match exactly.
 
 ## Model Details
 
