@@ -18,10 +18,12 @@ app.py                # Streamlit dashboard (the UI)
 model/
   train.py            # Training script (synthetic sample data)
   predict.py          # Prediction + confidence
+  benchmark.py        # Real archived NBA holdout, separate from serving
   artifacts/
     model.json        # Saved XGBoost model (native format; not committed)
 data/
   features.py         # Feature engineering (shared train/serve)
+  historical.py       # Pinned FiveThirtyEight archive ingestion
 utils/
   odds.py             # The Odds API integration + parsing
   kelly.py            # Kelly Criterion calculator
@@ -79,6 +81,10 @@ docker run -p 7860:7860 --env-file .env sports-betting-ml
 | Holdout Brier score | ~0.24 |
 
 These figures come from `python -m model.train` on the synthetic generator — workflow demo only, not production returns. ROI/Sharpe are **not** computed by the training script.
+
+## Historical Benchmark
+
+`python -m model.benchmark` downloads and checksum-verifies a fixed FiveThirtyEight archive, trains on ending-year seasons 2010–2014, and holds out 2015. The daily walk-forward protocol excludes same-date results, resets rolling history each season, and freezes the trained model and home-rate baseline. See `docs/historical-benchmark.md` and `docs/benchmarks/nba-2015.json` for measured results and limits. It writes to `benchmark-results/`, never the default serving artifact. Unit tests stay offline; CI also runs the real benchmark and uploads its evidence.
 
 ## Troubleshooting
 

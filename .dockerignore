@@ -15,3 +15,10 @@ __pycache__
 *.egg-info
 dist
 build
+
+# Local dependencies and offline benchmark inputs/outputs
+.venv
+venv
+data/raw
+data/processed
+benchmark-results

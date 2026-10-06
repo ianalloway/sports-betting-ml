@@ -65,6 +65,16 @@ jobs:
         path: model/artifacts/model.json
         retention-days: 30
 
+    - name: Run pinned historical holdout benchmark
+      run: python -m model.benchmark
+
+    - name: Upload historical benchmark evidence
+      uses: actions/upload-artifact@v7
+      with:
+        name: historical-benchmark
+        path: benchmark-results/
+        retention-days: 30
+
     - name: Verify prediction functions
       run: |
         python -c "from model.predict import predict_game, get_default_stats, predict_with_confidence; stats = get_default_stats(); h_prob, a_prob = predict_game(stats, stats); print(f'Prediction: Home {h_prob:.1%}, Away {a_prob:.1%}')"
