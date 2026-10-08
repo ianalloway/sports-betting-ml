@@ -1,4 +1,4 @@
-streamlit==1.64.0
+streamlit==1.65.0
 pandas==3.0.6
 numpy==2.5.3
 scikit-learn==1.9.1
@@ -6,4 +6,4 @@ xgboost==3.4.1
 scipy==1.18.1
 requests==2.34.2
 plotly==7.1.0
-python-dotenv==1.2.3
+python-dotenv==1.2.4
