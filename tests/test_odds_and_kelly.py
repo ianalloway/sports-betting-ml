@@ -3,6 +3,7 @@
 import math
 
 import pytest
+import requests
 
 from utils.kelly import (
     american_to_decimal,
@@ -11,7 +12,8 @@ from utils.kelly import (
     find_value_bets,
     kelly_criterion,
 )
-from utils.odds import get_best_h2h_odds_for_game, get_best_odds, parse_odds
+from utils import odds
+from utils.odds import get_best_h2h_odds_for_game, get_best_odds, parse_odds, redact_api_key
 
 
 def test_american_odds_conversion_positive_negative_and_zero():
@@ -205,3 +207,54 @@ def test_get_best_h2h_odds_for_game_skips_non_numeric_and_non_dict_outcomes():
     home_odds, away_odds = get_best_h2h_odds_for_game(game)
     assert home_odds == -110
     assert away_odds == 100
+
+
+def test_redact_api_key_strips_credential_query_params_and_literal_key():
+    text = (
+        "401 Client Error: Unauthorized for url: "
+        "https://api.the-odds-api.com/v4/sports/basketball_nba/odds?apiKey=sekrit123&regions=us&token=t0k"
+    )
+    redacted = redact_api_key(text, api_key="sekrit123")
+    assert "sekrit123" not in redacted
+    assert "t0k" not in redacted
+    assert "apiKey=REDACTED&regions=us" in redacted
+    assert redact_api_key("proxy said sekrit123", api_key="sekrit123") == "proxy said REDACTED"
+
+
+def test_get_nba_odds_http_error_does_not_print_api_key(monkeypatch, capsys):
+    secret = "live-odds-key-abc123"
+    monkeypatch.setattr(odds, "API_KEY", secret)
+
+    def fake_get(url, params, timeout):
+        response = requests.Response()
+        response.status_code = 401
+        response.reason = "Unauthorized"
+        response.url = requests.Request("GET", url, params=params).prepare().url
+        return response
+
+    monkeypatch.setattr(odds.requests, "get", fake_get)
+
+    result = odds.get_nba_odds()
+
+    out = capsys.readouterr()
+    printed = out.out + out.err
+    assert secret not in printed
+    assert "HTTP 401" in printed
+    assert "/sports/basketball_nba/odds" in printed
+    assert result == odds.get_demo_odds()
+
+
+def test_get_nba_odds_connection_error_does_not_print_api_key(monkeypatch, capsys):
+    secret = "live-odds-key-abc123"
+    monkeypatch.setattr(odds, "API_KEY", secret)
+
+    def fake_get(url, params, timeout):
+        raise requests.ConnectionError(f"Max retries exceeded with url: /v4/sports/basketball_nba/odds?apiKey={secret}")
+
+    monkeypatch.setattr(odds.requests, "get", fake_get)
+
+    odds.get_nba_odds()
+
+    out = capsys.readouterr()
+    assert secret not in out.out + out.err
+    assert "ConnectionError" in out.out
