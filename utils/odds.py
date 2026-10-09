@@ -1,6 +1,7 @@
 """Integration with The Odds API for live betting odds."""
 
 import os
+import re
 import requests
 from typing import Optional
 from dotenv import load_dotenv
@@ -9,6 +10,18 @@ load_dotenv()
 
 API_KEY = os.getenv("ODDS_API_KEY", "")
 BASE_URL = "https://api.the-odds-api.com/v4"
+NBA_ODDS_PATH = "/sports/basketball_nba/odds"
+
+_SECRET_QUERY_PARAM = re.compile(r"(?i)([?&;](?:apikey|api_key|key|token)=)[^&;#\s'\"]*")
+
+
+def redact_api_key(text: str, api_key: Optional[str] = None) -> str:
+    """Strip credential query params (and the literal key, if known) from text."""
+    redacted = _SECRET_QUERY_PARAM.sub(r"\1REDACTED", str(text))
+    secret = API_KEY if api_key is None else api_key
+    if secret:
+        redacted = redacted.replace(secret, "REDACTED")
+    return redacted
 
 
 def get_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
@@ -26,7 +39,7 @@ def get_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
         print("Warning: ODDS_API_KEY not set. Using demo data.")
         return get_demo_odds()
 
-    url = f"{BASE_URL}/sports/basketball_nba/odds"
+    url = f"{BASE_URL}{NBA_ODDS_PATH}"
     params = {
         "apiKey": API_KEY,
         "regions": regions,
@@ -39,7 +52,11 @@ def get_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
-        print(f"Error fetching odds: {e}")
+        # requests embeds the full URL (including apiKey) in exception text.
+        response = getattr(e, "response", None)
+        status = getattr(response, "status_code", None)
+        reason = f"HTTP {status}" if status is not None else type(e).__name__
+        print(f"Error fetching odds from {NBA_ODDS_PATH}: {reason} ({redact_api_key(str(e))})")
         return get_demo_odds()
 
 
