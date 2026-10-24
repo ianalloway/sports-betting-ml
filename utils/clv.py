@@ -29,12 +29,11 @@ def clv_probability_points(open_american: int, close_american: int) -> float:
 
 
 def beat_close(open_american: int, close_american: int) -> bool:
-    """Return True when open American odds are strictly better than the close.
+    """Return True when the open price has lower implied probability.
 
-    Higher American odds are better for the bettor (+150 > +130, −110 > −150).
-    Equal lines do not count as beating the close.
+    Equivalent even-money prices (+100 and -100) count as a matched close.
     """
-    return open_american > close_american
+    return clv_probability_points(open_american, close_american) > 0.0
 
 
 def annotate_clv(bet: Mapping) -> dict:
@@ -180,7 +179,7 @@ def attach_synthetic_closes(
     out: list[dict] = []
     for bet in bets:
         row = dict(bet)
-        open_odds = int(row.get("open_odds", row["odds"]))
+        open_odds = int(row["open_odds"] if "open_odds" in row else row["odds"])
         # Slight mean-reverting noise; value edge correlates loosely with +CLV.
         edge = float(row.get("edge", 0.0))
         drift = (0.002 * np.sign(edge)) + float(rng.normal(0.0, drift_std))
