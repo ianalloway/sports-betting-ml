@@ -38,6 +38,14 @@ def test_beat_close_uses_american_odds_ordering():
     assert beat_close(100, 100) is False
 
 
+@pytest.mark.parametrize("open_odds,close_odds", [(100, -100), (-100, 100)])
+def test_even_money_prices_are_equivalent(open_odds, close_odds):
+    row = annotate_clv({"open_odds": open_odds, "close_odds": close_odds})
+    assert row["clv_pts"] == 0.0
+    assert row["beat_close"] is False
+    assert summarize_clv([row])["n_beat_close"] == 0
+
+
 def test_summarize_clv_empty_and_mixed_slice():
     empty = summarize_clv([])
     assert empty["n_bets"] == 0
@@ -101,6 +109,19 @@ def test_attach_synthetic_closes_labels_source():
     assert all(r["odds_source"] == "synthetic_close" for r in annotated)
     assert all(r["open_odds"] == value_bets[i]["odds"] for i, r in enumerate(annotated))
     assert all("close_odds" in r and "clv_pts" in r for r in annotated)
+
+
+def test_attach_synthetic_closes_accepts_open_odds_without_odds():
+    bets = [{"team": "Lakers", "open_odds": -145, "edge": 4.0}]
+    result = attach_synthetic_closes(bets, seed=1)
+    assert result[0]["open_odds"] == -145
+    assert result[0]["odds_source"] == "synthetic_close"
+    assert "close_odds" not in bets[0]
+
+
+def test_attach_synthetic_closes_prefers_explicit_open_odds():
+    result = attach_synthetic_closes([{"open_odds": 150, "odds": -110}], seed=1)
+    assert result[0]["open_odds"] == 150
 
 
 def test_annotate_clv_and_chart_records():
