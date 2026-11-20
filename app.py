@@ -21,17 +21,29 @@ from utils.clv import (
     simulate_synthetic_clv_bets,
     summarize_clv,
 )
-from utils.odds import get_nba_odds, parse_odds, get_best_h2h_odds_for_game
+from utils.odds import get_live_nba_odds, get_demo_odds, parse_odds, get_best_h2h_odds_for_game
 from model.predict import predict_game, get_default_stats, predict_with_confidence, load_model
 
 # Caching API calls and Model Loading
 @st.cache_data(ttl=300)
-def cached_get_nba_odds():
-    return get_nba_odds()
+def cached_nba_games():
+    live_games = parse_odds(get_live_nba_odds() or [])
+    if live_games:
+        return live_games, False
+    return parse_odds(get_demo_odds()), True
 
 @st.cache_resource
 def get_cached_model():
-    return load_model()
+    model = load_model()
+    if model is not None:
+        return model
+
+    # Community Cloud starts directly from app.py, without the Docker training step.
+    from data.features import prepare_training_data
+    from model.train import create_sample_data, train_model
+
+    features, outcomes = prepare_training_data(create_sample_data())
+    return train_model(features, outcomes)
 
 # Load Model once for the page
 cached_model = get_cached_model()
@@ -85,7 +97,7 @@ require_beat_close = st.sidebar.checkbox(
 )
 
 if st.sidebar.button("Refresh Odds"):
-    cached_get_nba_odds.clear()
+    cached_nba_games.clear()
     st.rerun()
 
 st.sidebar.markdown("---")
@@ -133,25 +145,12 @@ tab1, tab2, tab3, tab4 = st.tabs(
 )
 
 with tab1:
-    st.header("Today's NBA Games")
+    with st.spinner("Fetching odds..."):
+        games, is_demo = cached_nba_games()
 
-    # Fetch odds with error handling
-    try:
-        with st.spinner("Fetching odds..."):
-            raw_odds = cached_get_nba_odds()
-            games = parse_odds(raw_odds) if raw_odds else []
-
-        if not games:
-            st.warning("No games available. Showing demo data.")
-            is_demo = True
-        else:
-            is_demo = False
-    except Exception as e:
-        st.error(f"Failed to fetch odds: {str(e)}")
-        st.info("Using demo data for display purposes.")
-        raw_odds = cached_get_nba_odds()  # This will return demo data on error
-        games = parse_odds(raw_odds) if raw_odds else []
-        is_demo = True
+    st.header("Example NBA Games" if is_demo else "Today's NBA Games")
+    if is_demo:
+        st.caption("Sample matchups and odds. Win probabilities come from the XGBoost model trained on synthetic games.")
 
     # Display games
     for game in games:
@@ -223,7 +222,7 @@ with tab2:
     st.markdown(f"*Showing bets with edge >= {min_edge}%*")
 
     if is_demo:
-        st.info("Currently showing demo data. Set ODDS_API_KEY in .env to use live data.")
+        st.caption("Calculated from sample matchups and odds.")
 
     value_bets = []
 

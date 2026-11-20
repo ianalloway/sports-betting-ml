@@ -7,7 +7,7 @@ NBA game prediction and value-bet detection using XGBoost + Kelly Criterion. Str
 - Predict NBA game winners with an XGBoost classifier trained on synthetic sample games
 - Identify +EV bets by comparing model probabilities to market-implied odds
 - Size bets using Kelly Criterion
-- Serve via Streamlit dashboard (live demo on Hugging Face)
+- Serve via Streamlit dashboard (live demo on Streamlit Community Cloud, Python 3.12)
 
 Demo/synthetic evaluation figures live in the README. Treat them as a workflow demo, not production returns.
 

@@ -24,7 +24,7 @@ def redact_api_key(text: str, api_key: Optional[str] = None) -> str:
     return redacted
 
 
-def get_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
+def get_live_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
     """
     Fetch current NBA odds from The Odds API.
 
@@ -37,7 +37,7 @@ def get_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
     """
     if not API_KEY:
         print("Warning: ODDS_API_KEY not set. Using demo data.")
-        return get_demo_odds()
+        return None
 
     url = f"{BASE_URL}{NBA_ODDS_PATH}"
     params = {
@@ -57,7 +57,13 @@ def get_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[list]:
         status = getattr(response, "status_code", None)
         reason = f"HTTP {status}" if status is not None else type(e).__name__
         print(f"Error fetching odds from {NBA_ODDS_PATH}: {reason} ({redact_api_key(str(e))})")
-        return get_demo_odds()
+        return None
+
+
+def get_nba_odds(markets: str = "h2h", regions: str = "us") -> list:
+    """Return the provider's response, falling back to sample odds when unavailable."""
+    games = get_live_nba_odds(markets, regions)
+    return get_demo_odds() if games is None else games
 
 
 def parse_odds(games: list) -> list:
