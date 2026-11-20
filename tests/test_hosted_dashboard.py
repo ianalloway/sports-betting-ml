@@ -25,3 +25,21 @@ def test_cloud_startup_without_model_or_odds_key(monkeypatch, tmp_path):
         bankroll.set_value(2000).run()
         assert not app.exception
         fit.assert_called_once()
+
+
+def test_historical_forecast_selector_matches_archived_results(monkeypatch):
+    import json
+
+    monkeypatch.setattr(odds, "API_KEY", "")
+    root = Path(__file__).resolve().parents[1]
+    report = json.loads((root / "docs/benchmarks/nba-2015.json").read_text())
+    app = AppTest.from_file(str(root / "app.py"), default_timeout=90).run()
+    for label, key in (("XGBoost", "xgboost"), ("Training home-win rate", "home_rate_baseline")):
+        selector = next(widget for widget in app.selectbox if widget.label == "Historical forecast")
+        if selector.value != label:
+            selector.set_value(label).run()
+        assert not app.exception
+        values = {metric.label: metric.value for metric in app.metric}
+        assert values["Historical Brier score"] == f"{report[key]['brier_score']:.3f}"
+        assert values["Expected calibration error"] == f"{report[key]['ece_10_equal_width_bins']:.1%}"
+        assert any("1,149 held-out games" in item.value for item in app.caption)

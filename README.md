@@ -167,6 +167,8 @@ Re-run `python -m model.train` to regenerate metrics for your machine; synthetic
 
 ## Historical Holdout Benchmark
 
+The Model Information tab plots observed home-win rates against forecast probabilities from the archived 2015 holdout. Switch between XGBoost and the training home-win-rate baseline to inspect the Brier score, calibration error and bin sample sizes.
+
 Run a separate, reproducible benchmark on free archived NBA results:
 
 ```bash
