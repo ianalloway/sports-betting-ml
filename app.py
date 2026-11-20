@@ -24,16 +24,17 @@ from utils.clv import (
     simulate_synthetic_clv_bets,
     summarize_clv,
 )
-from utils.odds import get_live_nba_odds, get_demo_odds, parse_odds, get_best_h2h_odds_for_game
-from model.predict import predict_game, get_default_stats, predict_with_confidence, load_model
+from utils.odds import get_demo_odds, get_nba_odds_with_source, parse_odds, get_best_h2h_odds_for_game
+from model.predict import get_default_stats, predict_with_confidence, load_model
 
-# Caching API calls and Model Loading
+
 @st.cache_data(ttl=300)
 def cached_nba_games():
-    live_games = parse_odds(get_live_nba_odds() or [])
-    if live_games:
-        return live_games, False
-    return parse_odds(get_demo_odds()), True
+    raw_games, source = get_nba_odds_with_source()
+    games = parse_odds(raw_games)
+    if not games:
+        return parse_odds(get_demo_odds()), "demo"
+    return games, source
 
 @st.cache_resource
 def get_cached_model():
@@ -47,6 +48,20 @@ def get_cached_model():
 
     features, outcomes = prepare_training_data(create_sample_data())
     return train_model(features, outcomes)
+
+def render_moneyline(price, model_prob):
+    if price is None:
+        st.caption("Moneyline unavailable")
+        return
+    implied = american_to_implied_prob(price)
+    edge = calculate_edge(model_prob, implied)
+    st.metric("Best Odds", f"{price:+d}")
+    st.metric("Implied Probability", f"{implied:.1%}")
+    if edge > 0:
+        st.success(f"Edge: +{edge:.1f}%")
+    else:
+        st.error(f"Edge: {edge:.1f}%")
+
 
 # Load Model once for the page
 cached_model = get_cached_model()
@@ -149,11 +164,14 @@ tab1, tab2, tab3, tab4 = st.tabs(
 
 with tab1:
     with st.spinner("Fetching odds..."):
-        games, is_demo = cached_nba_games()
+        games, source = cached_nba_games()
 
-    st.header("Example NBA Games" if is_demo else "Today's NBA Games")
-    if is_demo:
-        st.caption("Sample matchups and odds. Win probabilities come from the XGBoost model trained on synthetic games.")
+    st.header("Example NBA Games" if source == "demo" else "Today's NBA Games")
+    if source == "demo":
+        st.info("Showing sample odds.")
+        st.caption("Win probabilities come from the XGBoost model trained on synthetic games.")
+
+    scored_games = []
 
     # Display games
     for game in games:
@@ -165,36 +183,23 @@ with tab1:
             home_stats = DEMO_TEAM_STATS.get(home_team, get_default_stats())
             away_stats = DEMO_TEAM_STATS.get(away_team, get_default_stats())
 
-            # Predict with error handling
-            home_prob, away_prob = predict_game(home_stats, away_stats, model=cached_model)
+            pred_ci = predict_with_confidence(home_stats, away_stats, home_team, away_team, model=cached_model)
+            home_prob, away_prob = pred_ci.home_prob, pred_ci.away_prob
 
-            # Get best odds (fallback defaults are only used when a team
-            # has no available price in the parsed bookmaker data).
-            best_home_odds, best_away_odds = get_best_h2h_odds_for_game(game)
-
-            # Calculate edge
-            home_implied = american_to_implied_prob(best_home_odds)
-            away_implied = american_to_implied_prob(best_away_odds)
-            home_edge = calculate_edge(home_prob, home_implied)
-            away_edge = calculate_edge(away_prob, away_implied)
+            best_home_odds, best_away_odds = get_best_h2h_odds_for_game(
+                game, default_home_odds=None, default_away_odds=None
+            )
+            scored_games.append((game, pred_ci, best_home_odds, best_away_odds))
 
             # Display game card
             with st.container():
                 col1, col2, col3 = st.columns([2, 1, 2])
 
-                # Get prediction with confidence intervals
-                pred_ci = predict_with_confidence(home_stats, away_stats, home_team, away_team, model=cached_model)
-
                 with col1:
                     st.subheader(f"🏠 {home_team}")
                     st.metric("Model Probability", f"{home_prob:.1%}")
-                    st.caption(f"95% CI: [{pred_ci.home_ci_low:.1%} - {pred_ci.home_ci_high:.1%}]")
-                    st.metric("Best Odds", f"{best_home_odds:+d}")
-                    st.metric("Implied Probability", f"{home_implied:.1%}")
-                    if home_edge > 0:
-                        st.success(f"Edge: +{home_edge:.1f}%")
-                    else:
-                        st.error(f"Edge: {home_edge:.1f}%")
+                    st.caption(f"Illustrative model range: [{pred_ci.home_ci_low:.1%} - {pred_ci.home_ci_high:.1%}]")
+                    render_moneyline(best_home_odds, home_prob)
 
                 with col2:
                     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -206,13 +211,8 @@ with tab1:
                 with col3:
                     st.subheader(f"✈️ {away_team}")
                     st.metric("Model Probability", f"{away_prob:.1%}")
-                    st.caption(f"95% CI: [{pred_ci.away_ci_low:.1%} - {pred_ci.away_ci_high:.1%}]")
-                    st.metric("Best Odds", f"{best_away_odds:+d}")
-                    st.metric("Implied Probability", f"{away_implied:.1%}")
-                    if away_edge > 0:
-                        st.success(f"Edge: +{away_edge:.1f}%")
-                    else:
-                        st.error(f"Edge: {away_edge:.1f}%")
+                    st.caption(f"Illustrative model range: [{pred_ci.away_ci_low:.1%} - {pred_ci.away_ci_high:.1%}]")
+                    render_moneyline(best_away_odds, away_prob)
 
                 st.markdown("---")
 
@@ -224,57 +224,36 @@ with tab2:
     st.header("🎯 Value Bets")
     st.markdown(f"*Showing bets with edge >= {min_edge}%*")
 
-    if is_demo:
-        st.caption("Calculated from sample matchups and odds.")
+    if source == "demo":
+        st.info("Value bets below use sample odds.")
 
     value_bets = []
 
-    for game in games:
+    for game, prediction, best_home_odds, best_away_odds in scored_games:
         try:
             home_team = game['home_team']
             away_team = game['away_team']
+            home_prob, away_prob = prediction.home_prob, prediction.away_prob
 
-            home_stats = DEMO_TEAM_STATS.get(home_team, get_default_stats())
-            away_stats = DEMO_TEAM_STATS.get(away_team, get_default_stats())
-
-            home_prob, away_prob = predict_game(home_stats, away_stats, model=cached_model)
-
-            # Get best odds (fallback defaults are only used when a team
-            # has no available price in the parsed bookmaker data).
-            best_home_odds, best_away_odds = get_best_h2h_odds_for_game(game)
-
-            # Check home team
-            home_implied = american_to_implied_prob(best_home_odds)
-            home_edge = calculate_edge(home_prob, home_implied)
-            if home_edge >= min_edge:
-                decimal_odds = american_to_decimal(best_home_odds)
-                kelly_bet = kelly_criterion(home_prob, decimal_odds, kelly_fraction)
+            for team, opponent, location, prob, price in (
+                (home_team, away_team, "Home", home_prob, best_home_odds),
+                (away_team, home_team, "Away", away_prob, best_away_odds),
+            ):
+                if price is None:
+                    continue
+                implied = american_to_implied_prob(price)
+                edge = calculate_edge(prob, implied)
+                if edge < min_edge:
+                    continue
+                kelly_bet = kelly_criterion(prob, american_to_decimal(price), kelly_fraction)
                 value_bets.append({
-                    'team': home_team,
-                    'opponent': away_team,
-                    'location': 'Home',
-                    'model_prob': home_prob,
-                    'implied_prob': home_implied,
-                    'odds': best_home_odds,
-                    'edge': home_edge,
-                    'kelly_pct': kelly_bet,
-                    'bet_amount': kelly_bet * bankroll
-                })
-
-            # Check away team
-            away_implied = american_to_implied_prob(best_away_odds)
-            away_edge = calculate_edge(away_prob, away_implied)
-            if away_edge >= min_edge:
-                decimal_odds = american_to_decimal(best_away_odds)
-                kelly_bet = kelly_criterion(away_prob, decimal_odds, kelly_fraction)
-                value_bets.append({
-                    'team': away_team,
-                    'opponent': home_team,
-                    'location': 'Away',
-                    'model_prob': away_prob,
-                    'implied_prob': away_implied,
-                    'odds': best_away_odds,
-                    'edge': away_edge,
+                    'team': team,
+                    'opponent': opponent,
+                    'location': location,
+                    'model_prob': prob,
+                    'implied_prob': implied,
+                    'odds': price,
+                    'edge': edge,
                     'kelly_pct': kelly_bet,
                     'bet_amount': kelly_bet * bankroll
                 })

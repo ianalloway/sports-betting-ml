@@ -232,7 +232,7 @@ def predict_with_confidence(
     """
     Predict game outcome with confidence intervals.
 
-    Uses bootstrap resampling to estimate prediction uncertainty.
+    Builds illustrative Wilson ranges using a heuristic effective sample size.
 
     Args:
         home_stats: Home team statistics
@@ -241,7 +241,7 @@ def predict_with_confidence(
         away_team: Away team name
         model: Trained model (loads default if None)
         confidence_level: Confidence level for intervals (default 95%)
-        n_bootstrap: Number of bootstrap samples
+        n_bootstrap: Retained for compatibility. The range calculation ignores this value.
 
     Returns:
         PredictionWithConfidence object with point estimates and intervals
@@ -249,10 +249,9 @@ def predict_with_confidence(
     # Get point estimate
     home_prob, away_prob = predict_game(home_stats, away_stats, model)
 
-    # Calculate confidence intervals
-    # Use effective sample size based on model training data
-    # Higher for more confident predictions, lower for uncertain ones
-    effective_n = int(100 * (1 - abs(home_prob - 0.5) * 2))  # 50-100 based on certainty
+    # The demonstration treats the point estimate as a binomial proportion
+    # with a heuristic effective sample size.
+    effective_n = int(100 * (1 - abs(home_prob - 0.5) * 2))
     effective_n = max(30, effective_n)  # Minimum 30 samples
 
     home_ci_low, home_ci_high = calculate_confidence_interval(

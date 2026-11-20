@@ -1,5 +1,6 @@
 """Tests for odds parsing and value-bet math."""
 
+import json
 import math
 
 import pytest
@@ -258,3 +259,23 @@ def test_get_nba_odds_connection_error_does_not_print_api_key(monkeypatch, capsy
     out = capsys.readouterr()
     assert secret not in out.out + out.err
     assert "ConnectionError" in out.out
+
+
+def test_odds_with_source_distinguishes_live_data_even_when_empty(monkeypatch):
+    monkeypatch.setattr(odds, "API_KEY", "unused")
+    for payload in ([], [{"id": "a-live-game"}]):
+        reply = requests.Response()
+        reply.status_code = 200
+        reply._content = json.dumps(payload).encode()
+        monkeypatch.setattr(odds.requests, "get", lambda *args, **kwargs: reply)
+        assert odds.get_nba_odds_with_source() == (payload, "live")
+
+
+def test_odds_with_source_marks_missing_credentials_and_outages(monkeypatch):
+    def offline(*args, **kwargs):
+        raise requests.ConnectionError("offline")
+
+    monkeypatch.setattr(odds.requests, "get", offline)
+    for key in ("", "unused"):
+        monkeypatch.setattr(odds, "API_KEY", key)
+        assert odds.get_nba_odds_with_source() == (odds.get_demo_odds(), "demo")
