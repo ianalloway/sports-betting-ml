@@ -18,7 +18,7 @@ license: mit
 ![CI](https://github.com/ianalloway/sports-betting-ml/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-[![Live Demo](https://img.shields.io/badge/🤗_Hugging_Face-Live_Demo-yellow)](https://huggingface.co/spaces/ianalloway/sports-betting-ml)
+[![Live Demo](https://img.shields.io/badge/Streamlit-Live_Demo-FF4B4B)](https://ian-sports-betting-ml.streamlit.app/)
 
 <p align="center">
   <img src="docs/architecture.svg" alt="Sports Betting ML Architecture" width="800"/>
@@ -28,7 +28,7 @@ license: mit
 
 Applied sports ML **training demo** for predicting NBA game outcomes and identifying value bets by comparing model probabilities to market odds.
 
-**Live demo:** [huggingface.co/spaces/ianalloway/sports-betting-ml](https://huggingface.co/spaces/ianalloway/sports-betting-ml)
+**Live demo:** [Sports ML dashboard](https://ian-sports-betting-ml.streamlit.app/)
 
 **Stack layering:** [nba-ratings](https://github.com/ianalloway/nba-ratings) (Python) → [kelly-js](https://github.com/ianalloway/kelly-js) (TS) → **sports-betting-ml** (this training demo) → [ai-advantage](https://github.com/ianalloway/ai-advantage) (product).
 
