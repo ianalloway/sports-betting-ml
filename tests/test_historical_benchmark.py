@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 from data import historical
-from model.benchmark import date_split, historical_features, probability_metrics, run_benchmark
+from model.benchmark import date_split, historical_features, monthly_metrics, probability_metrics, run_benchmark
 
 
 def schedule():
@@ -191,5 +191,22 @@ def test_cli_saves_strict_report_and_keeps_serving_artifact_separate(monkeypatch
     predictions = pd.read_csv(output / 'predictions.csv')
     assert report['source']['sha256'] == 'fixture-only'
     assert len(predictions) == report['data_counts']['holdout_games']
+    monthly = pd.read_csv(output / 'monthly-metrics.csv')
+    assert monthly['model'].tolist() == ['xgboost', 'home_rate_baseline']
+    assert monthly['n_games'].tolist() == [len(predictions)] * 2
     assert (output / 'model.json').is_file()
     assert serving.read_text() == 'untouched serving model'
+
+
+def test_monthly_metrics_group_across_year_boundary_and_include_one_class_months():
+    frame = pd.DataFrame({
+        'date': pd.to_datetime(['2015-01-03', '2014-12-30', '2015-01-07']),
+        'home_win': [0, 1, 1],
+        'xgboost_probability': [0.2, 0.75, 0.6], 'home_rate_probability': [0.5] * 3,
+    })
+    rows = monthly_metrics(frame)
+    model = rows[rows.model == 'xgboost']
+    assert model.month.tolist() == ['2014-12', '2015-01']
+    assert model.n_games.tolist() == [1, 2]
+    assert model.brier_score.tolist() == pytest.approx([0.0625, 0.1])
+    assert rows[rows.model == 'home_rate_baseline'].brier_score.tolist() == [0.25, 0.25]

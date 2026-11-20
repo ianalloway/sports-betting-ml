@@ -107,6 +107,21 @@ def probability_metrics(targets, probabilities):
     }
 
 
+def monthly_metrics(predictions):
+    """Score each calendar month's holdout predictions against the same outcomes."""
+    rows = []
+    for month, games in predictions.groupby(predictions['date'].dt.to_period('M'), sort=True):
+        for name, column in [('xgboost', 'xgboost_probability'),
+                             ('home_rate_baseline', 'home_rate_probability')]:
+            metrics = probability_metrics(games['home_win'], games[column])
+            rows.append({
+                'month': str(month), 'model': name,
+                **{key: metrics[key] for key in ['n_games', 'home_win_rate', 'mean_probability',
+                                                 'accuracy', 'brier_score', 'log_loss']},
+            })
+    return pd.DataFrame(rows)
+
+
 def run_benchmark(games, holdout_start='2014-07-01', holdout_end='2015-07-01'):
     X, metadata = historical_features(games)
     train, test = date_split(metadata, holdout_start, holdout_end)
@@ -158,6 +173,7 @@ def main():
     }
     args.output_dir.mkdir(parents=True, exist_ok=True)
     predictions.to_csv(args.output_dir / 'predictions.csv', index=False)
+    monthly_metrics(predictions).to_csv(args.output_dir / 'monthly-metrics.csv', index=False)
     model.save_model(args.output_dir / 'model.json')
     # XGBoost includes an unset missing-value parameter represented by NaN.
     params = report['configuration']['model_parameters']
@@ -171,7 +187,7 @@ def main():
         print(f"{name}: n={metrics['n_games']} accuracy={metrics['accuracy']:.4f} "
               f"log_loss={metrics['log_loss']:.4f} Brier={metrics['brier_score']:.4f} "
               f"ECE={metrics['ece_10_equal_width_bins']:.4f}")
-    print(f'Report, predictions, and separate benchmark model saved to {args.output_dir}')
+    print(f'Report, predictions, monthly metrics, and separate benchmark model saved to {args.output_dir}')
 
 
 if __name__ == '__main__':
