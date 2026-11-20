@@ -56,6 +56,8 @@ This is the modeling / demo side of the sports analytics story:
 - lightweight deployment through Streamlit and Hugging Face
 - a public example of applied ML with a real user interface
 
+The game cards and value-bet table label sample prices when the feed is empty or unavailable. If a bookmaker price is missing for a team, the dashboard skips that side when calculating value bets. The ranges on game cards use a Wilson formula with an assumed sample size. Their coverage on future NBA outcomes has not been measured.
+
 ## How It Works
 
 1. **Data Collection**: Synthetic NBA game rows with team stats, home/away performance, recent form (`model/train.py`)

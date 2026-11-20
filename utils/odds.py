@@ -60,10 +60,18 @@ def get_live_nba_odds(markets: str = "h2h", regions: str = "us") -> Optional[lis
         return None
 
 
-def get_nba_odds(markets: str = "h2h", regions: str = "us") -> list:
-    """Return the provider's response, falling back to sample odds when unavailable."""
+def get_nba_odds_with_source(markets: str = "h2h", regions: str = "us") -> tuple[list, str]:
+    """Return provider odds or clearly identified sample fixtures when unavailable."""
     games = get_live_nba_odds(markets, regions)
-    return get_demo_odds() if games is None else games
+    if games is None:
+        return get_demo_odds(), "demo"
+    return games, "live"
+
+
+def get_nba_odds(markets: str = "h2h", regions: str = "us") -> list:
+    """Return odds, falling back to sample games when the provider is unavailable."""
+    games, _ = get_nba_odds_with_source(markets, regions)
+    return games
 
 
 def parse_odds(games: list) -> list:
@@ -179,9 +187,9 @@ def get_best_odds(games: list) -> list:
 
 def get_best_h2h_odds_for_game(
     game: dict,
-    default_home_odds: int = -150,
-    default_away_odds: int = 130
-) -> tuple[int, int]:
+    default_home_odds: Optional[int] = -150,
+    default_away_odds: Optional[int] = 130
+) -> tuple[Optional[int], Optional[int]]:
     """Return best available moneyline odds for a single parsed game.
 
     Defaults are used only when odds are missing for a team. Seed values
