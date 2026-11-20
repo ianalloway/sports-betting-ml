@@ -16,7 +16,7 @@ The first run downloads about 18 MB to `data/raw/nbaallelo.csv` using public HTT
 python -m model.benchmark --archive /path/to/nbaallelo.csv --output-dir benchmark-results
 ```
 
-The output directory contains `report.json` (source, configuration, counts, environment, metrics, reliability bins), `predictions.csv` (game IDs, dates, outcomes, both probabilities), and `model.json` (trained only on the training period). Use a fresh output directory for each run; an unsuccessful rerun does not remove evidence from a prior run. CI runs the real benchmark and uploads these files as `historical-benchmark`. Normal pytest tests use small, explicitly invented fixtures without network access.
+The output directory contains `report.json` (source, configuration, counts, environment, metrics, reliability bins), `predictions.csv` (game IDs, dates, outcomes, both probabilities), `monthly-metrics.csv` (one row per observed calendar month and model), and `model.json` (trained only on the training period). The monthly rows compare XGBoost and the frozen home-rate baseline on the same games, with game count, home win rate, mean forecast, accuracy, Brier score, and log loss. Use a fresh output directory for each run; an unsuccessful rerun does not remove evidence from a prior run. CI runs the real benchmark and uploads these files as `historical-benchmark`. Normal pytest tests use small, explicitly invented fixtures without network access.
 
 ## Source and attribution
 
