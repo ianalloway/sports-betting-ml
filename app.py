@@ -3,6 +3,9 @@ Sports Betting ML - NBA Game Prediction & Value Bet Finder
 A Streamlit app for predicting NBA game outcomes and finding value bets.
 """
 
+import json
+from pathlib import Path
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -460,6 +463,33 @@ with tab4:
         "Synthetic demo metrics from `python -m model.train` (walk-forward CV + chronological holdout). "
         "Not live betting results — the training script does not compute ROI or Sharpe."
     )
+
+    st.subheader("Historical forecast calibration")
+    benchmark_file = Path(__file__).resolve().parent / "docs" / "benchmarks" / "nba-2015.json"
+    benchmark = json.loads(benchmark_file.read_text(encoding="utf-8"))
+    dates = benchmark["data_counts"]
+    st.caption(
+        f"Separate historical NBA benchmark · {dates['holdout_games']:,} held-out games · "
+        f"{dates['holdout_first_date']} to {dates['holdout_last_date']}. "
+        "Each point compares a group's mean predicted home-win probability with its observed home-win rate."
+    )
+    models = {"XGBoost": "xgboost", "Training home-win rate": "home_rate_baseline"}
+    selected = st.selectbox("Historical forecast", list(models))
+    metrics = benchmark[models[selected]]
+    score_col, error_col = st.columns(2)
+    score_col.metric("Historical Brier score", f"{metrics['brier_score']:.3f}")
+    error_col.metric("Expected calibration error", f"{metrics['ece_10_equal_width_bins']:.1%}")
+    bins = pd.DataFrame(row for row in metrics["reliability_bins"] if row["count"])
+    chart = px.scatter(
+        bins, x="mean_probability", y="home_win_rate", size="count", size_max=30,
+        hover_data={"count": True, "mean_probability": ":.1%", "home_win_rate": ":.1%"},
+        labels={"mean_probability": "Predicted home-win probability",
+                "home_win_rate": "Observed home-win rate", "count": "Games"},
+    )
+    chart.add_shape(type="line", x0=0, x1=1, y0=0, y1=1, line={"dash": "dot"}, layer="below")
+    chart.update_xaxes(range=[0, 1], tickformat=".0%")
+    chart.update_yaxes(range=[0, 1], tickformat=".0%")
+    st.plotly_chart(chart, use_container_width=True)
 
     st.markdown("""
     #### Value Betting Strategy
